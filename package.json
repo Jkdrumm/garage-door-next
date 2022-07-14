@@ -1,24 +1,60 @@
 {
   "name": "garage-door-next",
   "version": "0.1.0",
+  "author": {
+    "name": "Joshua Drumm",
+    "email": "Schythed@gmail.com"
+  },
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 80",
+    "startSecure": "node server.js",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "docker": "docker build -t schythed/garage --platform linux/arm64/v8 .",
+    "pretty": "prettier --write \"./**/*.{ts,tsx,json}\""
   },
   "dependencies": {
+    "@chakra-ui/icons": "^2.0.2",
+    "@chakra-ui/react": "^2.2.0",
+    "@greenlock/manager": "^3.1.0",
+    "@root/greenlock": "^4.0.5",
+    "acme-dns-01-godaddy": "^3.0.1",
+    "axios": "^0.27.2",
+    "bcryptjs": "^2.4.3",
+    "chakra-dayzed-datepicker": "^0.2.0",
+    "date-fns": "^2.28.0",
+    "dayzed": "^3.2.3",
+    "express": "^4.18.1",
+    "formik": "^2.2.9",
+    "godaddy-dns": "^1.3.0",
+    "greenlock": "^4.0.4",
+    "greenlock-store-fs": "^3.2.2",
+    "i": "^0.3.7",
+    "lodash.merge": "^4.6.2",
+    "mongodb": "^4.7.0",
     "next": "12.1.6",
-    "react": "18.1.0",
-    "react-dom": "18.1.0"
+    "next-auth": "^4.6.1",
+    "node-gyp": "^9.0.0",
+    "npm": "^8.14.0",
+    "onoff": "^6.0.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.4.0",
+    "react-query": "^3.39.1",
+    "react-text-transition": "^3.0.2",
+    "socket.io": "^4.5.1",
+    "socket.io-client": "^4.5.1"
   },
   "devDependencies": {
-    "@types/node": "17.0.40",
-    "@types/react": "18.0.12",
+    "@types/bcryptjs": "^2.4.2",
+    "@types/node": "^18.0.0",
+    "@types/react": "^18.0.14",
     "@types/react-dom": "18.0.5",
-    "eslint": "8.17.0",
+    "eslint": "^8.18.0",
     "eslint-config-next": "12.1.6",
-    "typescript": "4.7.3"
-  }
+    "typescript": "^4.7.4"
+  },
+  "bin": "server.js"
 }
