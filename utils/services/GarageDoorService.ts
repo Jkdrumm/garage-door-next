@@ -19,8 +19,8 @@ export class GarageDoorService {
       closer.watch(this.closeListener);
       const openValue = opener.readSync();
       const closeValue = closer.readSync();
-      if (openValue && closeValue) this.changeState(GarageState.UNKNOWN);
-      else if (!openValue) this.changeState(GarageState.OPEN);
+      if (!openValue && !closeValue) this.changeState(GarageState.UNKNOWN);
+      else if (openValue) this.changeState(GarageState.OPEN);
       else this.changeState(GarageState.CLOSED);
     }
   }
@@ -43,12 +43,12 @@ export class GarageDoorService {
   }
 
   private openListener(_error: any, value: 0 | 1) {
-    if (value === Gpio.HIGH) this.changeState(GarageState.UNKNOWN);
+    if (value === Gpio.LOW) this.changeState(GarageState.UNKNOWN);
     else this.changeState(GarageState.CLOSED);
   }
 
   private closeListener(_error: any, value: 0 | 1) {
-    if (value === Gpio.HIGH) this.changeState(GarageState.UNKNOWN);
+    if (value === Gpio.LOW) this.changeState(GarageState.UNKNOWN);
     else this.changeState(GarageState.OPEN);
   }
 
