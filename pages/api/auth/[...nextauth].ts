@@ -15,7 +15,7 @@ export default NextAuth({
       },
       async authorize(credentials) {
         const { username, password } = credentials as any;
-        const client = await MongoClient.connect(`${process.env.MONGODB_URI}`);
+        const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
         const users = client.db().collection('users');
         const result = await users.findOne({
           username: username

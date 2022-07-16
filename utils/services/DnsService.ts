@@ -24,7 +24,7 @@ export class DnsService {
   }
 
   private loadDNS = async () => {
-    const client = await MongoClient.connect(`${process.env.MONGODB_URI}`);
+    const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
     const db = client.db();
     const settings = await db.collection('settings').findOne();
     if (settings) {
@@ -42,7 +42,7 @@ export class DnsService {
     // In development mode, use a global variable so that the value
     // is preserved across module reloads caused by HMR (Hot Module Replacement).
     if (process.env.NODE_ENV === 'development') {
-      const global = globalThis as any;
+      const global = global as any;
       if (!global.dnsServiceInstance) global.dnsServiceInstance = new DnsService();
       return global.dnsServiceInstance;
     }
@@ -73,20 +73,16 @@ export class DnsService {
   }
 
   public async newLogin(key: string, secret: string, hostname: string) {
-    try {
-      await this.login(true, key, secret, hostname);
-      const client = await MongoClient.connect(`${process.env.MONGODB_URI}`);
-      const db = client.db();
-      await db
-        .collection('settings')
-        .updateOne({}, { $set: { dnsHostname: hostname, dnsApiKey: key, dnsApiSecret: secret } }, { upsert: true });
-      this.key = key;
-      this.secret = secret;
-      this.hostname = hostname;
-      await LogService.getInstance().addEntry(LogEvent.DNS_UPDATE, {});
-    } catch (error) {
-      throw error;
-    }
+    await this.login(true, key, secret, hostname);
+    const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
+    const db = client.db();
+    await db
+      .collection('settings')
+      .updateOne({}, { $set: { dnsHostname: hostname, dnsApiKey: key, dnsApiSecret: secret } }, { upsert: true });
+    this.key = key;
+    this.secret = secret;
+    this.hostname = hostname;
+    await LogService.getInstance().addEntry(LogEvent.DNS_UPDATE, {});
   }
 
   public getKey() {

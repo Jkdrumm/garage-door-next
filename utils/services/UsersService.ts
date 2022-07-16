@@ -19,7 +19,7 @@ export class UsersService {
   }
 
   private async loadUsers() {
-    const client = await MongoClient.connect(`${process.env.MONGODB_URI}`);
+    const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
     const db = client.db();
     db.collection('users')
       .find()

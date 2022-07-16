@@ -15,7 +15,7 @@ const updateProfile = async (req: NextApiRequest, res: NextApiResponse) => {
   if (hasFirstName) updateParameters.firstName = firstName;
   if (hasLastName) updateParameters.lastName = lastName;
   if (hasPassword) updateParameters.password = await hash(password, 12);
-  const client = await MongoClient.connect(`${process.env.MONGODB_URI}`);
+  const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
   const db = client.db();
   const updateResult = await db
     .collection('users')

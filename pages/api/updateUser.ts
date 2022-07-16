@@ -11,7 +11,7 @@ const updateUser = async (req: NextApiRequest, res: NextApiResponse) => {
   const updateParameters = {
     adminLevel
   };
-  const client = await MongoClient.connect(`${process.env.MONGODB_URI}`);
+  const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
   const db = client.db();
   const updateResult = await db.collection('users').updateOne({ _id: new ObjectId(id) }, { $set: updateParameters });
   if (updateResult.acknowledged) {

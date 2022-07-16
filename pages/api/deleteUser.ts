@@ -4,7 +4,7 @@ import { apiRequireAdmin, requirePost } from '../../utils/auth';
 import { UsersService } from '../../utils/services';
 
 const deleteUser = async (req: NextApiRequest, res: NextApiResponse) => {
-  const client = await MongoClient.connect(`${process.env.MONGODB_URI}`);
+  const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
   const db = client.db();
   const { id } = req.body;
   const updateResult = await db.collection('users').deleteOne({ _id: new ObjectId(id) });

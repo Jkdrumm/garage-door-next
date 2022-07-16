@@ -27,9 +27,11 @@ export class LogService {
     const endDate = new Date(date);
     if (length === 'month') endDate.setMonth(endDate.getMonth() - 1);
     else if (length === 'week') endDate.setDate(endDate.getDate() - 6);
-    const client = await MongoClient.connect(`${process.env.MONGODB_URI}`);
+    const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
     const db = client.db();
+    // eslint-disable-next-line no-unused-vars
     let resolver: (value: any) => void;
+    // eslint-disable-next-line no-unused-vars
     let rejector: (reason?: any) => void;
     const returnPromise = new Promise<LogEntryResult[]>((resolve, reject) => {
       resolver = resolve;
@@ -53,7 +55,7 @@ export class LogService {
     event: LogEvent,
     { oldValue, newValue, userId, username, firstName, lastName }: Omit<LogEntryResult, 'id' | 'event' | 'date'>
   ) {
-    const client = await MongoClient.connect(`${process.env.MONGODB_URI}`);
+    const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
     const db = client.db();
     await db
       .collection('logs')

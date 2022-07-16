@@ -12,7 +12,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (validateName(firstName) || validateName(lastName) || validateUsername(username) || validatePassword(password))
     return res.status(422).json({ message: 'Invalid Data' });
 
-  const client = await MongoClient.connect(`${process.env.MONGODB_URI}`);
+  const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
   const db = client.db();
   const checkExistingUser = await db.collection('users').findOne({ username });
   // Send error response if duplicate user is found
