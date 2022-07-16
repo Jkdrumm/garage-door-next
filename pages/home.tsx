@@ -151,7 +151,7 @@ const Home: PageWithLayout = () => {
         width="50%"
         height="64px"
         isLoading={buttonLoading}
-        disabled={!canMove}>
+        disabled={!canMove || doorState === GarageState.FETCHING}>
         Activate
       </Button>
     </CenterBox>
