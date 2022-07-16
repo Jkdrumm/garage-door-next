@@ -1,4 +1,14 @@
-import { Button, Flex, FormControl, FormErrorMessage, FormLabel, Input, Text } from '@chakra-ui/react';
+import {
+  Button,
+  Flex,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  Input,
+  InputGroup,
+  InputRightElement,
+  Text
+} from '@chakra-ui/react';
 import { Formik, Form, Field } from 'formik';
 import { signIn } from 'next-auth/react';
 import { validateUsername, validatePassword } from '../utils/validations';
@@ -6,11 +16,13 @@ import { CenterBox, Link } from '../components';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { requireLoggedOut } from '../utils/auth';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 
 const Index = () => {
   const router = useRouter();
   const [loginError, setLoginError] = useState<string>();
   const [loginLoading, setLoginLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
   return (
     <CenterBox title="Login" showColorToggleOnDesktop>
@@ -44,7 +56,19 @@ const Index = () => {
                 {({ field, form }: { field: any; form: any }) => (
                   <FormControl isInvalid={form.errors.password && form.touched.password}>
                     <FormLabel htmlFor="password">Password</FormLabel>
-                    <Input {...field} id="password" placeholder="password" type="password" />
+                    <InputGroup>
+                      <Input
+                        {...field}
+                        id="password"
+                        placeholder="password"
+                        type={showPassword ? 'text' : 'password'}
+                      />
+                      <InputRightElement h="full">
+                        <Button variant="ghost" onClick={() => setShowPassword(showPassword => !showPassword)}>
+                          {showPassword ? <ViewIcon /> : <ViewOffIcon />}
+                        </Button>
+                      </InputRightElement>
+                    </InputGroup>
                     <FormErrorMessage>{form.errors.password}</FormErrorMessage>
                   </FormControl>
                 )}
@@ -55,6 +79,7 @@ const Index = () => {
                 </Text>
               )}
               <Button
+                type="submit"
                 colorScheme="purple"
                 mt={4}
                 borderRadius="48px"

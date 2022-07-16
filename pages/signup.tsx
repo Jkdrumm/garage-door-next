@@ -105,7 +105,7 @@ const SignUp = () => {
                       <InputGroup>
                         <Input {...field} id="password" type={showPassword ? 'text' : 'password'} />
                         <InputRightElement h="full">
-                          <Button variant={'ghost'} onClick={() => setShowPassword(showPassword => !showPassword)}>
+                          <Button variant="ghost" onClick={() => setShowPassword(showPassword => !showPassword)}>
                             {showPassword ? <ViewIcon /> : <ViewOffIcon />}
                           </Button>
                         </InputRightElement>
@@ -120,6 +120,7 @@ const SignUp = () => {
                   </Text>
                 )}
                 <Button
+                  type="submit"
                   colorScheme="purple"
                   mt={4}
                   borderRadius="48px"

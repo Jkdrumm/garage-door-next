@@ -5,7 +5,12 @@ export const theme = extendTheme({
     global: {
       body: {
         overflowX: 'hidden'
+      },
+      button: {
+        WebkitTapHighlightColor: 'transparent'
       }
-    }
+    },
+    useSustemColorMode: true,
+    initialColorMode: 'dark'
   }
 });
