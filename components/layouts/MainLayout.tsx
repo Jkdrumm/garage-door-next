@@ -284,6 +284,13 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
                     _hover={{ textDecoration: 'none' }}>
                     User Settings
                   </MenuItem>
+                  <MenuItem
+                    as={Link}
+                    icon={<FiFileText size="1.25em" />}
+                    href="/logs"
+                    _hover={{ textDecoration: 'none' }}>
+                    Logs
+                  </MenuItem>
                 </>
               )}
               <MenuItem onClick={toggleColorMode} display={{ base: 'block', md: 'none' }} icon={themeIcon}>
