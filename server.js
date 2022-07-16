@@ -64,10 +64,32 @@ global.startHttps = () => {
   if (enableHttps) startHttps();
 };
 
+const localDomains = process.env.NODE_ENV === 'production' ? ['localhost', 'raspberrypi.local'] : ['localhost'];
+
 app
   .prepare()
   .then(() => {
-    server.all('*', (req, res) => handle(req, res));
+    server.all('*', (req, res) => {
+      const {
+        headers: { host },
+        url
+      } = req;
+      /**
+       * Redirect to HTTPS under 4 conditions
+       * 1. Attempting to access over HTTP
+       * 2. HTTPS server is configured
+       * 3. Not accesing over local domain names
+       * 4. Not accessing using an IP address
+       */
+      if (
+        !req.secure &&
+        enableHttps &&
+        !localDomains.includes(host) &&
+        !/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/.test(host)
+      )
+        res.redirect('https://' + host + url);
+      else handle(req, res);
+    });
     startHttp();
     if (enableHttps) startHttps();
   })
