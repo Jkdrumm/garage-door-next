@@ -35,12 +35,27 @@ const loadOptions = () => {
 
 try {
   loadOptions();
+  // eslint-disable-next-line no-empty
 } catch {}
 
 const startHttps = () => {
   if (httpsServer) httpsServer.close();
-  httpsServer = https.createServer(options, server).listen(ports.https);
+  httpsServer = https
+    .createServer(options, server)
+    .listen(ports.https)
+    .on('error', err => console.error(err))
+    // Restart on crash
+    .on('close', startHttps);
   global.httpsStarted = true;
+};
+
+const startHttp = () => {
+  http
+    .createServer(server)
+    .listen(ports.http)
+    .on('error', err => console.error(err))
+    // Restart on crash
+    .on('close', startHttps);
 };
 
 global.httpsStarted = false;
@@ -53,7 +68,7 @@ app
   .prepare()
   .then(() => {
     server.all('*', (req, res) => handle(req, res));
-    http.createServer(server).listen(ports.http);
+    startHttp();
     if (enableHttps) startHttps();
   })
   .catch(error => console.error(error));

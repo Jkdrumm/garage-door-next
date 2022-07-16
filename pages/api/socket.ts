@@ -23,3 +23,9 @@ const socket = async (req: NextApiRequest, res: SocketApiResponse) => {
 };
 
 export default apiRequireLoggedIn(socket as any);
+
+export const config = {
+  api: {
+    externalResolver: true
+  }
+};

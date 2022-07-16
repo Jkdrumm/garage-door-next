@@ -1,6 +1,6 @@
 import type { Message, PageWithLayout } from '../utils/types';
 import { Button, Flex, Text } from '@chakra-ui/react';
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 import { useMainLayout } from '../components/layouts';
 import { AdminLevel, GarageAction, GarageEvent, GarageState } from '../utils/enums';
@@ -22,14 +22,14 @@ const Home: PageWithLayout = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const stopWebSocket = () => {
+  const stopWebSocket = useCallback(() => {
     webSocket?.removeAllListeners();
     webSocket?.disconnect();
-  };
+  }, [webSocket]);
 
   useEffect(() => {
     return stopWebSocket;
-  }, []);
+  }, [stopWebSocket]);
 
   useQuery('socket', () => axios.post('/api/socket'), {
     refetchOnWindowFocus: false,
@@ -107,10 +107,10 @@ const Home: PageWithLayout = () => {
   const iconStyles = { size: '48px' };
   const getGarageBoxIcon = (doorState: GarageState) =>
     [
-      <FiUnlock {...iconStyles} />,
-      <FiLock {...iconStyles} />,
-      <FiAlertCircle {...iconStyles} />,
-      <FiLoader {...iconStyles} />
+      <FiUnlock {...iconStyles} key={1} />,
+      <FiLock {...iconStyles} key={2} />,
+      <FiAlertCircle {...iconStyles} key={3} />,
+      <FiLoader {...iconStyles} key={4} />
     ][doorState];
 
   const canMove = buttonLoading || adminLevel >= AdminLevel.USER;

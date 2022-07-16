@@ -12,3 +12,9 @@ const user = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default apiRequireLoggedIn(user);
+
+export const config = {
+  api: {
+    externalResolver: true
+  }
+};

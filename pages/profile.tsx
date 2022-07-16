@@ -9,7 +9,6 @@ import {
   InputGroup,
   InputRightElement,
   Switch,
-  Text,
   useToast
 } from '@chakra-ui/react';
 import axios from 'axios';

@@ -1,3 +1,7 @@
 {
-  "extends": ["next/core-web-vitals", "eslint-config-next", "next", "prettier"]
+  "extends": ["next/core-web-vitals", "eslint:recommended", "eslint-config-next", "next", "prettier"],
+  "globals": {
+    "React": true,
+    "NodeJS": true
+  }
 }

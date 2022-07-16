@@ -32,7 +32,7 @@ const getCertificate = async (_req: NextApiRequest, res: NextApiResponse) => {
       }
     });
 
-    const fullConfig = await greenlock.add({
+    await greenlock.add({
       subject: hostname,
       altnames: [hostname],
       agreeToTerms: true,

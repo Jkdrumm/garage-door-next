@@ -14,3 +14,9 @@ const logs = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default requirePost(apiRequireAdmin(logs));
+
+export const config = {
+  api: {
+    externalResolver: true
+  }
+};

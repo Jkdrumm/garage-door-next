@@ -4,7 +4,7 @@ import { getUsers } from '../../utils/auth/get';
 
 const users = async (_req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const users = await getUsers();
+    const users = getUsers();
     res.status(200).json(users);
   } catch (e) {
     res.status(400).end();
@@ -12,3 +12,9 @@ const users = async (_req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default apiRequireAdmin(users);
+
+export const config = {
+  api: {
+    externalResolver: true
+  }
+};

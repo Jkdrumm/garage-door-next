@@ -12,3 +12,9 @@ const numNotifications = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default apiRequireLoggedIn(numNotifications);
+
+export const config = {
+  api: {
+    externalResolver: true
+  }
+};

@@ -27,7 +27,6 @@ export class DnsService {
     const client = await MongoClient.connect(`${process.env.MONGODB_URI}`);
     const db = client.db();
     const settings = await db.collection('settings').findOne();
-    console.log('LOADING');
     if (settings) {
       this.key = settings.dnsApiKey ?? null;
       this.hostname = settings.dnsHostname ?? null;
@@ -58,7 +57,6 @@ export class DnsService {
     secret: string = this.secret ?? '',
     hostname: string = this.hostname ?? ''
   ) {
-    console.log('LOGGING IN');
     const currentIp = await getCurrentIp();
     if (newLogin || this.lastRefreshIP === undefined || this.lastRefreshIP !== currentIp) {
       this.lastRefreshIP = currentIp;

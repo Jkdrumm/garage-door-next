@@ -22,7 +22,7 @@ import { LogEntryResult, LogEvent } from '../../utils/types/LogEntry';
 
 export interface LogCardProps extends Omit<LogEntryResult, 'id'> {}
 
-export const LogCard = ({ event, date, oldValue, newValue, userId, username, firstName, lastName }: LogCardProps) => {
+export const LogCard = ({ event, date, oldValue, newValue, username, firstName, lastName }: LogCardProps) => {
   const dateObject = new Date(date);
   const timeFormatted = dateObject.toLocaleTimeString();
 
@@ -75,6 +75,8 @@ export const LogCard = ({ event, date, oldValue, newValue, userId, username, fir
     }
   };
 
+  const bodyBackground = useColorModeValue('gray.300', 'gray.600');
+
   return (
     <Box padding="4px" margin="-6px -4px -8px">
       <Box
@@ -109,7 +111,7 @@ export const LogCard = ({ event, date, oldValue, newValue, userId, username, fir
                   </Flex>
                 </Flex>
               </AccordionButton>
-              <Box as={AccordionPanel} padding="16px" bg={useColorModeValue('gray.300', 'gray.600')}>
+              <Box as={AccordionPanel} padding="16px" bg={bodyBackground}>
                 {getBodyText()}
               </Box>
             </>

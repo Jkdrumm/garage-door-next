@@ -1,3 +1,3 @@
 import { UsersService } from '../../services';
 
-export const getUsers = async () => UsersService.getInstance().getUsers();
+export const getUsers = () => UsersService.getInstance().getUsers();

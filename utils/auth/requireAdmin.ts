@@ -10,9 +10,9 @@ export const requireAdmin =
     try {
       const user = await getUserFromCache(context.req);
       const queryClient = new QueryClient();
-      await prefetchUser(queryClient, user);
-      await prefetchAdminLevel(queryClient, user.adminLevel);
-      await prefetchNotificationCount(queryClient, UsersService.getInstance().getNotificationCount(user.adminLevel));
+      prefetchUser(queryClient, user);
+      prefetchAdminLevel(queryClient, user.adminLevel);
+      prefetchNotificationCount(queryClient, UsersService.getInstance().getNotificationCount(user.adminLevel));
       const serverSideResult = {
         props: {
           dehydratedState: dehydrate(queryClient)

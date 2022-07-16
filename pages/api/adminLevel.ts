@@ -12,3 +12,9 @@ const adminLevel = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default apiRequireLoggedIn(adminLevel);
+
+export const config = {
+  api: {
+    externalResolver: true
+  }
+};

@@ -1,4 +1,4 @@
-import { CheckCircleIcon, CloseIcon, SmallCloseIcon } from '@chakra-ui/icons';
+import { CheckCircleIcon, SmallCloseIcon } from '@chakra-ui/icons';
 import {
   Button,
   Circle,
@@ -135,6 +135,8 @@ const Settings = () => {
     setDnsSignInError('');
   };
 
+  const closeIconSeethroughColor = useColorModeValue('white', 'gray.700');
+
   return (
     <>
       <Container maxW="4xl">
@@ -155,7 +157,7 @@ const Settings = () => {
               <CheckCircleIcon boxSize="24px" color="green.300" />
             ) : (
               <Circle bg="red.300" size="24px">
-                <SmallCloseIcon boxSize="24px" color={useColorModeValue('white', 'gray.700')} />
+                <SmallCloseIcon boxSize="24px" color={closeIconSeethroughColor} />
               </Circle>
             )}
             <Divider m="16px 0px" />
@@ -183,7 +185,7 @@ const Settings = () => {
               <CheckCircleIcon boxSize="24px" color="green.300" />
             ) : (
               <Circle bg="red.300" size="24px">
-                <SmallCloseIcon boxSize="24px" color={useColorModeValue('white', 'gray.700')} />
+                <SmallCloseIcon boxSize="24px" color={closeIconSeethroughColor} />
               </Circle>
             )}
             <Divider m="16px 0px" />
@@ -234,8 +236,8 @@ const Settings = () => {
                     <Link href="https://developer.godaddy.com/keys" isExternal color="blue.400">
                       GoDaddy
                     </Link>{' '}
-                    DNS, create an API key and enter the key and secret here. Choose "production" when asked for an
-                    environment.
+                    DNS, create an API key and enter the key and secret here. Choose &quot;production&quot; when asked
+                    for an environment.
                   </Text>
 
                   <Field name="key" validate={validateApiKey}>
@@ -300,7 +302,7 @@ export const getServerSideProps = requireAdmin(async () => {
     isLoggedIn: dnsService.getIsLoggedIn(),
     isRunningHttps: dnsService.getIsRunningHttps()
   };
-  await prefetchDnsInfo(queryClient, dnsInfo);
+  prefetchDnsInfo(queryClient, dnsInfo);
   return { props: { dehydratedState: dehydrate(queryClient) } };
 });
 

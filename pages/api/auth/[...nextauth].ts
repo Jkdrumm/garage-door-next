@@ -13,7 +13,7 @@ export default NextAuth({
         username: { label: 'Username', type: 'text' },
         password: { label: 'Password', type: 'password' }
       },
-      async authorize(credentials, _req) {
+      async authorize(credentials) {
         const { username, password } = credentials as any;
         const client = await MongoClient.connect(`${process.env.MONGODB_URI}`);
         const users = client.db().collection('users');

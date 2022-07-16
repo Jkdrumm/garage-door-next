@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { apiRequireAdmin } from '../../utils/auth';
 import { DnsService } from '../../utils/services';
 
-const dnsInfo = async (req: NextApiRequest, res: NextApiResponse) => {
+const dnsInfo = async (_req: NextApiRequest, res: NextApiResponse) => {
   try {
     const dnsService = DnsService.getInstance();
     const hostname = dnsService.getHostname();
@@ -15,3 +15,9 @@ const dnsInfo = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default apiRequireAdmin(dnsInfo);
+
+export const config = {
+  api: {
+    externalResolver: true
+  }
+};
