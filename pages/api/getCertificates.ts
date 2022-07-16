@@ -54,7 +54,7 @@ const getCertificate = async (_req: NextApiRequest, res: NextApiResponse) => {
     try {
       const { pems } = await greenlock.get({ servername: hostname });
       if (pems && pems.privkey && pems.cert && pems.chain) {
-        (global as any).startHttps();
+        global.startHttps();
         res.status(200).end();
         LogService.getInstance().addEntry(LogEvent.CERTIFICATES, {});
       } else res.status(400).end();

@@ -46,9 +46,8 @@ export class UsersService {
     // In development mode, use a global variable so that the value
     // is preserved across module reloads caused by HMR (Hot Module Replacement).
     if (process.env.NODE_ENV === 'development') {
-      const global = globalThis as any;
-      if (!global.adminLevelServiceInstance) global.adminLevelServiceInstance = new UsersService();
-      return global.adminLevelServiceInstance;
+      if (!global.usersServiceInstance) global.usersServiceInstance = new UsersService();
+      return global.usersServiceInstance;
     }
 
     if (!this.instance) this.instance = new UsersService();

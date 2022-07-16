@@ -42,7 +42,6 @@ export class DnsService {
     // In development mode, use a global variable so that the value
     // is preserved across module reloads caused by HMR (Hot Module Replacement).
     if (process.env.NODE_ENV === 'development') {
-      const global = global as any;
       if (!global.dnsServiceInstance) global.dnsServiceInstance = new DnsService();
       return global.dnsServiceInstance;
     }
