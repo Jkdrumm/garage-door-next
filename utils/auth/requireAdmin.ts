@@ -1,5 +1,6 @@
 import type { GetServerSideProps } from 'next/types';
 import { dehydrate, QueryClient } from 'react-query';
+import { AdminLevel } from '../enums';
 import { prefetchAdminLevel, prefetchNotificationCount, prefetchUser } from '../hooks/prefetch';
 import { UsersService } from '../services';
 import { getUserFromCache } from './get';
@@ -9,6 +10,7 @@ export const requireAdmin =
   async context => {
     try {
       const user = await getUserFromCache(context.req);
+      if (user.adminLevel < AdminLevel.ADMIN) throw new Error('Unauthorized');
       const queryClient = new QueryClient();
       prefetchUser(queryClient, user);
       prefetchAdminLevel(queryClient, user.adminLevel);

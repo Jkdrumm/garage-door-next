@@ -84,7 +84,7 @@ app
       if (
         !req.secure &&
         enableHttps &&
-        !localDomains.includes(host) &&
+        !localDomains.includes(host.toLowerCase()) &&
         !/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/.test(host)
       )
         res.redirect('https://' + host + url);

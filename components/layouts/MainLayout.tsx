@@ -54,7 +54,7 @@ interface LinkItemProps {
 const LinkItems: Array<LinkItemProps> = [
   { name: 'Garage', icon: FiHome, href: '/home' },
   { name: 'Profile', icon: FiUser, href: '/profile' },
-  { name: 'Settings', icon: FiSettings, href: '/settings' },
+  { name: 'Settings', icon: FiSettings, requiredLevel: AdminLevel.ADMIN, href: '/settings' },
   { name: 'User Settings', icon: FiUsers, requiredLevel: AdminLevel.ADMIN, href: '/userSettings' },
   { name: 'Logs', icon: FiFileText, requiredLevel: AdminLevel.ADMIN, href: '/logs' }
 ];

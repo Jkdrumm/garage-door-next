@@ -10,10 +10,12 @@ import {
   InputRightElement,
   Text
 } from '@chakra-ui/react';
+import axios from 'axios';
 import { Formik, Form, Field } from 'formik';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
+import { useMutation } from 'react-query';
 import { CenterBox, Link } from '../components';
 import { requireLoggedOut } from '../utils/auth';
 import { validateUsername, validatePassword, validateName } from '../utils/validations';
@@ -24,39 +26,38 @@ const SignUp = () => {
   const [signUpLoading, setSignUpLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
+  const createAccountSuccess = async (_data: any, { username, password }: { [field: string]: string }) => {
+    const { ok } = (await signIn('credentials', {
+      redirect: false,
+      username,
+      password
+    })) as any;
+    if (!ok) {
+      // If account was created but there was an error logging in for some reason, just return to the login page.
+      router.push('/');
+    } else router.push('/home');
+  };
+  const createAccountError = (error: any) => {
+    setSignUpError(error.response.data.message);
+    setSignUpLoading(false);
+  };
+
+  const { mutate: createUser } = useMutation(
+    (user: { firstName: string; lastName: string; username: string; password: string }) =>
+      axios.post('/api/auth/signup', user),
+    {
+      onSuccess: createAccountSuccess,
+      onError: createAccountError
+    }
+  );
+
   return (
     <CenterBox title="Sign Up" showColorToggleOnDesktop>
       <Formik
         initialValues={{ firstName: '', lastName: '', username: '', password: '' }}
         onSubmit={async ({ firstName, lastName, username, password }: { [field: string]: string }) => {
           setSignUpLoading(true);
-          const res = await fetch('/api/auth/signup', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              firstName,
-              lastName,
-              username,
-              password
-            })
-          });
-          if (!res.ok) {
-            const { message } = await res.json();
-            setSignUpError(message);
-            setSignUpLoading(false);
-          } else {
-            const { ok } = (await signIn('credentials', {
-              redirect: false,
-              username,
-              password
-            })) as any;
-            if (!ok) {
-              // If account was created but there was an error logging in for some reason, just return to the login page.
-              router.push('/');
-            } else router.push('/home');
-          }
+          createUser({ firstName, lastName, username, password });
         }}>
         {props => (
           <Flex direction="column" width="100%" align="center">
