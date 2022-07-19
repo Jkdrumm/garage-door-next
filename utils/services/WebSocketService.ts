@@ -14,15 +14,8 @@ export class WebSocketService {
   private constructor() {}
 
   public static getInstance(): WebSocketService {
-    // In development mode, use a global variable so that the value
-    // is preserved across module reloads caused by HMR (Hot Module Replacement).
-    if (process.env.NODE_ENV === 'development') {
-      if (!global.webSocketManagerInstance) global.webSocketManagerInstance = new WebSocketService();
-      return global.webSocketManagerInstance;
-    }
-
-    if (!this.instance) this.instance = new WebSocketService();
-    return this.instance;
+    if (!global.webSocketManagerInstance) global.webSocketManagerInstance = new WebSocketService();
+    return global.webSocketManagerInstance;
   }
 
   public addSocket(socket: Socket, id: string, adminLevel: AdminLevel, expires: string) {

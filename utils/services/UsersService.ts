@@ -43,17 +43,8 @@ export class UsersService {
   }
 
   public static getInstance(): UsersService {
-    console.log('GETTING INSTANCE');
-    // In development mode, use a global variable so that the value
-    // is preserved across module reloads caused by HMR (Hot Module Replacement).
-    // eslint-disable-next-line no-constant-condition
-    if (true || process.env.NODE_ENV === 'development') {
-      if (!global.usersServiceInstance) global.usersServiceInstance = new UsersService();
-      return global.usersServiceInstance;
-    }
-
-    if (!this.instance) this.instance = new UsersService();
-    return this.instance;
+    if (!global.usersServiceInstance) global.usersServiceInstance = new UsersService();
+    return global.usersServiceInstance;
   }
 
   public getUser(id?: string) {
