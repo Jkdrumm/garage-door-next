@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { MongoClient, ObjectId } from 'mongodb';
 import { apiRequireAdmin, requirePost } from '../../utils/auth';
-import { UsersService } from '../../utils/services';
+import { service } from '../../utils/services';
 import { getUserFromCache } from '../../utils/auth/get';
 
 const updateUser = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -15,7 +15,7 @@ const updateUser = async (req: NextApiRequest, res: NextApiResponse) => {
   const db = client.db();
   const updateResult = await db.collection('users').updateOne({ _id: new ObjectId(id) }, { $set: updateParameters });
   if (updateResult.acknowledged) {
-    UsersService.getInstance().updateAdminLevel(id, adminLevel);
+    service.updateAdminLevel(id, adminLevel);
     res.status(200).end();
   } else res.status(400).end();
   client.close();

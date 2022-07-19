@@ -9,7 +9,7 @@ export interface UsersCache {
 
 setTimeout(() => {}, 1000);
 
-export class UsersService {
+class UsersService {
   private static instance: UsersService;
   private usersCache: UsersCache;
 
@@ -124,12 +124,14 @@ export class UsersService {
     if (adminLevel === AdminLevel.ACCOUNT) return 1;
     if (adminLevel < AdminLevel.ADMIN) return 0;
     // Admin accounts only
-    const numAccountLevelUsers = UsersService.getInstance()
-      .getUsers()
-      .filter(user => user.adminLevel === AdminLevel.ACCOUNT).length;
+    const numAccountLevelUsers = service.getUsers().filter(user => user.adminLevel === AdminLevel.ACCOUNT).length;
     return numAccountLevelUsers;
   }
 }
 
 // Load the service immediately
-UsersService.getInstance();
+// UsersService.getInstance();
+
+const service = UsersService.getInstance();
+
+export { service };

@@ -1,3 +1,3 @@
-import { UsersService } from '../../services';
+import { service } from '../../services';
 
-export const getUsers = () => UsersService.getInstance().getUsers();
+export const getUsers = () => service.getUsers();

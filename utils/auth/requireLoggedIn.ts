@@ -1,7 +1,7 @@
 import type { GetServerSideProps } from 'next/types';
 import { dehydrate, QueryClient } from 'react-query';
 import { prefetchAdminLevel, prefetchNotificationCount, prefetchUser } from '../hooks/prefetch';
-import { UsersService } from '../services';
+import { service } from '../services';
 import { getUserFromCache } from './get';
 
 export const requireLoggedIn =
@@ -12,7 +12,7 @@ export const requireLoggedIn =
       const queryClient = new QueryClient();
       prefetchUser(queryClient, user);
       prefetchAdminLevel(queryClient, user.adminLevel);
-      prefetchNotificationCount(queryClient, UsersService.getInstance().getNotificationCount(user.adminLevel));
+      prefetchNotificationCount(queryClient, service.getNotificationCount(user.adminLevel));
       const serverSideResult = {
         props: {
           dehydratedState: dehydrate(queryClient)

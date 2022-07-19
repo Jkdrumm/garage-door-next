@@ -3,7 +3,7 @@ import { WebSocketService } from './WebSocketService';
 import { Gpio } from 'onoff';
 import { LogService } from './LogService';
 import { LogEvent } from '../types/LogEntry';
-import { UsersService } from './UsersService';
+import { service } from './UsersService';
 
 export class GarageDoorService {
   private static instance: GarageDoorService;
@@ -52,7 +52,7 @@ export class GarageDoorService {
   }
 
   public pressButton(id: string) {
-    const { id: userId, username, firstName, lastName } = UsersService.getInstance().getUser(id);
+    const { id: userId, username, firstName, lastName } = service.getUser(id);
     LogService.getInstance().addEntry(LogEvent.PRESS, { userId, username, firstName, lastName });
     // If in development mode, just pick a random state
     if (process.env.NODE_ENV === 'development') {

@@ -1,11 +1,11 @@
 import type { GetServerSideProps } from 'next/types';
-import { getUser } from './get';
+import { getUserFromCache } from './get';
 
 export const requireLoggedOut =
   (getServerSideProps?: GetServerSideProps): GetServerSideProps =>
   async context => {
     try {
-      await getUser(context.req);
+      await getUserFromCache(context.req);
       return {
         redirect: {
           destination: '/home',
