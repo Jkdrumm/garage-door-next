@@ -1,8 +1,8 @@
 import type { NextRequest } from '../../types';
 import { getUser } from './getUser';
-import { service } from '../../services';
+import { UsersService } from '../../services';
 
 export const getUserFromCache = async (req: NextRequest) => {
   const user = await getUser(req);
-  return service.getUser(user.id);
+  return UsersService.getInstance().getUser(user.id);
 };

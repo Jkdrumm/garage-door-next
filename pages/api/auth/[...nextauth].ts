@@ -2,7 +2,7 @@ import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { MongoClient } from 'mongodb';
 import { compare } from 'bcryptjs';
-import { service } from '../../../utils/services';
+import { UsersService } from '../../../utils/services';
 
 const USERNAME_OR_PASSWORD_ERROR_MESSAGE = 'Invalid Username/Password';
 
@@ -39,7 +39,7 @@ export default NextAuth({
   session: { strategy: 'jwt' },
   callbacks: {
     session: async ({ session, token }) => {
-      const isInCache = service.isUserInCache((token as any).user.id);
+      const isInCache = UsersService.getInstance().isUserInCache((token as any).user.id);
       if (isInCache) {
         (session as any).user = token.user;
         return session;

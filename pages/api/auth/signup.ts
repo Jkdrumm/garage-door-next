@@ -3,7 +3,7 @@ import { MongoClient } from 'mongodb';
 import { hash } from 'bcryptjs';
 import { validateName, validatePassword, validateUsername } from '../../../utils/validations';
 import { AdminLevel } from '../../../utils/enums';
-import { service } from '../../../utils/services';
+import { UsersService } from '../../../utils/services';
 import { requirePost } from '../../../utils/auth';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -38,7 +38,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     password: await hash(password, 12),
     adminLevel
   });
-  service.addUser({ id: status.insertedId.toString(), firstName, lastName, username, adminLevel });
+  UsersService.getInstance().addUser({ id: status.insertedId.toString(), firstName, lastName, username, adminLevel });
   res.status(201).json({ message: 'User created', ...status });
   client.close();
 }

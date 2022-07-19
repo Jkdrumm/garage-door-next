@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { MongoClient, ObjectId } from 'mongodb';
 import { requirePost } from '../../utils/auth';
-import { service } from '../../utils/services';
+import { UsersService } from '../../utils/services';
 import { getUserFromCache } from '../../utils/auth/get';
 import { hash } from 'bcryptjs';
 
@@ -22,7 +22,7 @@ const updateProfile = async (req: NextApiRequest, res: NextApiResponse) => {
     .updateOne({ _id: new ObjectId(user.id) }, { $set: updateParameters });
   if (updateResult.acknowledged) {
     delete updateParameters.password;
-    if (hasFirstName || hasLastName) service.updateFields(user.id, updateParameters);
+    if (hasFirstName || hasLastName) UsersService.getInstance().updateFields(user.id, updateParameters);
     res.status(200).end();
   } else res.status(400).end();
   client.close();

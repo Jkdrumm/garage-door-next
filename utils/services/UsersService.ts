@@ -9,11 +9,11 @@ export interface UsersCache {
 
 setTimeout(() => {}, 1000);
 
-class UsersService {
+export class UsersService {
   private static instance: UsersService;
   private usersCache: UsersCache;
 
-  constructor() {
+  private constructor() {
     this.usersCache = {};
     this.loadUsers();
   }
@@ -46,7 +46,8 @@ class UsersService {
     console.log('GETTING INSTANCE');
     // In development mode, use a global variable so that the value
     // is preserved across module reloads caused by HMR (Hot Module Replacement).
-    if (process.env.NODE_ENV === 'development') {
+    // eslint-disable-next-line no-constant-condition
+    if (true || process.env.NODE_ENV === 'development') {
       if (!global.usersServiceInstance) global.usersServiceInstance = new UsersService();
       return global.usersServiceInstance;
     }
@@ -125,14 +126,10 @@ class UsersService {
     if (adminLevel === AdminLevel.ACCOUNT) return 1;
     if (adminLevel < AdminLevel.ADMIN) return 0;
     // Admin accounts only
-    const numAccountLevelUsers = service.getUsers().filter(user => user.adminLevel === AdminLevel.ACCOUNT).length;
+    const numAccountLevelUsers = this.getUsers().filter(user => user.adminLevel === AdminLevel.ACCOUNT).length;
     return numAccountLevelUsers;
   }
 }
 
 // Load the service immediately
-// UsersService.getInstance();
-
-const service = new UsersService();
-
-export { service };
+UsersService.getInstance();
