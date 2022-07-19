@@ -39,9 +39,13 @@ try {
 } catch {}
 
 const startHttps = () => {
-  if (httpsServer) httpsServer.close();
+  if (httpsServer) {
+    httpsServer.removeAllListeners();
+    httpsServer.close();
+  }
   httpsServer = https
     .createServer(options, server)
+    .removeAllListeners()
     .listen(ports.https)
     .on('error', err => console.error(err))
     // Restart on crash
@@ -55,7 +59,7 @@ const startHttp = () => {
     .listen(ports.http)
     .on('error', err => console.error(err))
     // Restart on crash
-    .on('close', startHttps);
+    .on('close', startHttp);
 };
 
 global.httpsStarted = false;
