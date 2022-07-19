@@ -17,7 +17,6 @@ export class WebSocketService {
     // In development mode, use a global variable so that the value
     // is preserved across module reloads caused by HMR (Hot Module Replacement).
     if (process.env.NODE_ENV === 'development') {
-      const global = globalThis as any;
       if (!global.webSocketManagerInstance) global.webSocketManagerInstance = new WebSocketService();
       return global.webSocketManagerInstance;
     }
@@ -42,17 +41,21 @@ export class WebSocketService {
     socket.on('message', (message: GarageAction) => {
       switch (message) {
         case GarageAction.PRESS:
-          const webSocketClients = this.getWebsocketClients();
-          const userSockets = webSocketClients[id];
-          const acknowledgement = new Payload();
-          acknowledgement.add({ event: GarageEvent.ACKNOWLEDGEMNET });
-          socket.emit('message', acknowledgement.getPayload());
-          if (userSockets.adminLevel >= AdminLevel.USER) GarageDoorService.getInstance().pressButton(id);
+          receivePress();
           break;
         default:
           console.error(`Unexpected Garage Action: ${message}`);
       }
     });
+
+    const receivePress = () => {
+      const webSocketClients = this.getWebsocketClients();
+      const userSockets = webSocketClients[id];
+      const acknowledgement = new Payload();
+      acknowledgement.add({ event: GarageEvent.ACKNOWLEDGEMNET });
+      socket.emit('message', acknowledgement.getPayload());
+      if (userSockets.adminLevel >= AdminLevel.USER) GarageDoorService.getInstance().pressButton(id);
+    };
 
     socket.on('disconnect', () => {
       const webSocketClients = this.getWebsocketClients();
