@@ -43,15 +43,8 @@ export class UsersService {
   }
 
   public static getInstance(): UsersService {
-    // In development mode, use a global variable so that the value
-    // is preserved across module reloads caused by HMR (Hot Module Replacement).
-    if (process.env.NODE_ENV === 'development') {
-      if (!global.usersServiceInstance) global.usersServiceInstance = new UsersService();
-      return global.usersServiceInstance;
-    }
-
-    if (!this.instance) this.instance = new UsersService();
-    return this.instance;
+    if (!global.usersServiceInstance) global.usersServiceInstance = new UsersService();
+    return global.usersServiceInstance;
   }
 
   public getUser(id?: string) {
@@ -124,9 +117,7 @@ export class UsersService {
     if (adminLevel === AdminLevel.ACCOUNT) return 1;
     if (adminLevel < AdminLevel.ADMIN) return 0;
     // Admin accounts only
-    const numAccountLevelUsers = UsersService.getInstance()
-      .getUsers()
-      .filter(user => user.adminLevel === AdminLevel.ACCOUNT).length;
+    const numAccountLevelUsers = this.getUsers().filter(user => user.adminLevel === AdminLevel.ACCOUNT).length;
     return numAccountLevelUsers;
   }
 }

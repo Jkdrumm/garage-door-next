@@ -26,15 +26,8 @@ export class GarageDoorService {
   }
 
   public static getInstance(): GarageDoorService {
-    // In development mode, use a global variable so that the value
-    // is preserved across module reloads caused by HMR (Hot Module Replacement).
-    if (process.env.NODE_ENV === 'development') {
-      if (!global.garageDoorServiceInstance) global.garageDoorServiceInstance = new GarageDoorService();
-      return global.garageDoorServiceInstance;
-    }
-
-    if (!this.instance) this.instance = new GarageDoorService();
-    return this.instance;
+    if (!global.garageDoorServiceInstance) global.garageDoorServiceInstance = new GarageDoorService();
+    return global.garageDoorServiceInstance;
   }
 
   public getDoorState() {

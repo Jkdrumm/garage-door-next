@@ -9,15 +9,8 @@ export class LogService {
   }
 
   public static getInstance(): LogService {
-    // In development mode, use a global variable so that the value
-    // is preserved across module reloads caused by HMR (Hot Module Replacement).
-    if (process.env.NODE_ENV === 'development') {
-      if (!global.logServiceInstance) global.logServiceInstance = new LogService();
-      return global.logServiceInstance;
-    }
-
-    if (!this.instance) this.instance = new LogService();
-    return this.instance;
+    if (!global.logServiceInstance) global.logServiceInstance = new LogService();
+    return global.logServiceInstance;
   }
 
   public async getLogs(date: string, length: LogLength) {

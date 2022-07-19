@@ -1,5 +1,4 @@
-import { getAdminLevel, getUser } from '.';
-import { AdminLevel } from '../../enums';
+import { getAdminLevel } from '.';
 import { UsersService } from '../../services';
 import { NextRequest } from '../../types';
 

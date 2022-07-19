@@ -39,15 +39,8 @@ export class DnsService {
   };
 
   public static getInstance(): DnsService {
-    // In development mode, use a global variable so that the value
-    // is preserved across module reloads caused by HMR (Hot Module Replacement).
-    if (process.env.NODE_ENV === 'development') {
-      if (!global.dnsServiceInstance) global.dnsServiceInstance = new DnsService();
-      return global.dnsServiceInstance;
-    }
-
-    if (!this.instance) this.instance = new DnsService();
-    return this.instance;
+    if (!global.dnsServiceInstance) global.dnsServiceInstance = new DnsService();
+    return global.dnsServiceInstance;
   }
 
   private async login(

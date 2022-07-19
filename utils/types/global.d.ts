@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import type { DnsService, GarageDoorService, LogService, UsersService } from '../services';
+import type { DnsService, GarageDoorService, LogService, UsersService, WebSocketService } from '../services';
 
 declare global {
   var startHttps: () => void;
@@ -7,4 +7,5 @@ declare global {
   var garageDoorServiceInstance: GarageDoorService;
   var logServiceInstance: LogService;
   var usersServiceInstance: UsersService;
+  var webSocketManagerInstance: WebSocketService;
 }
