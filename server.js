@@ -45,7 +45,6 @@ const startHttps = () => {
   }
   httpsServer = https
     .createServer(options, server)
-    .removeAllListeners()
     .listen(ports.https)
     .on('error', err => console.error(err))
     // Restart on crash
