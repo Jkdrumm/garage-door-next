@@ -67,7 +67,7 @@ const Home: PageWithLayout = () => {
             break;
           case GarageEvent.ADMIN:
             setAdminLevel(message);
-            queryClient.setQueryData('adminLevel', () => message);
+            queryClient.setQueryData('adminLevel', message);
             queryClient.invalidateQueries('notifications');
             break;
           case GarageEvent.SESSION_TIMEOUT:
