@@ -13,7 +13,7 @@ class UsersService {
   private static instance: UsersService;
   private usersCache: UsersCache;
 
-  private constructor() {
+  constructor() {
     this.usersCache = {};
     this.loadUsers();
   }
@@ -133,6 +133,6 @@ class UsersService {
 // Load the service immediately
 // UsersService.getInstance();
 
-const service = UsersService.getInstance();
+const service = new UsersService();
 
 export { service };
