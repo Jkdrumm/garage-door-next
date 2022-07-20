@@ -13,8 +13,8 @@ export class GarageDoorService {
     if (process.env.NODE_ENV === 'development') this.changeState(GarageState.CLOSED);
     else {
       this.doorState = GarageState.FETCHING;
-      const opener = new Gpio(18, 'in', 'both');
-      const closer = new Gpio(16, 'in', 'both');
+      const opener = new Gpio(24, 'in', 'both');
+      const closer = new Gpio(23, 'in', 'both');
       opener.watch(this.openListener);
       closer.watch(this.closeListener);
       const openValue = opener.readSync();
