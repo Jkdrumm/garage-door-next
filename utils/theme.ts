@@ -9,8 +9,6 @@ export const theme = extendTheme({
       button: {
         WebkitTapHighlightColor: 'transparent'
       }
-    },
-    useSustemColorMode: true,
-    initialColorMode: 'dark'
+    }
   }
 });
