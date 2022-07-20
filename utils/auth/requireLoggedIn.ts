@@ -15,7 +15,8 @@ export const requireLoggedIn =
       prefetchNotificationCount(queryClient, UsersService.getInstance().getNotificationCount(user.adminLevel));
       const serverSideResult = {
         props: {
-          dehydratedState: dehydrate(queryClient)
+          dehydratedState: dehydrate(queryClient),
+          cookies: context.req.headers.cookie ?? ''
         }
       };
       if (getServerSideProps) {

@@ -14,6 +14,6 @@ export const requireLoggedOut =
       };
     } catch (e) {
       if (getServerSideProps) return getServerSideProps(context);
-      return { props: {} };
+      return { props: { cookies: context.req.headers.cookie ?? '' } };
     }
   };

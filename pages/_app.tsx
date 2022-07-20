@@ -3,12 +3,11 @@ import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import { NextPage } from 'next/types';
 import { AppProps } from 'next/app';
-import { ChakraProvider } from '@chakra-ui/react';
+import { Chakra } from '../components/util';
 import { SessionProvider } from 'next-auth/react';
 import { useDefaultLayout } from '../components/layouts';
 import { useState } from 'react';
 import Head from 'next/head';
-import { theme } from '../utils/theme';
 
 type NextPageWithLayout = NextPage & GetLayout;
 
@@ -28,7 +27,7 @@ const PageComponent = ({ Component, pageProps, router }: AppPropsWithLayout) => 
   );
 };
 
-export default function App({ Component, pageProps: { session, ...pageProps }, router }: AppPropsWithLayout) {
+export default function App({ Component, pageProps: { session, cookies, ...pageProps }, router }: AppPropsWithLayout) {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
@@ -39,9 +38,9 @@ export default function App({ Component, pageProps: { session, ...pageProps }, r
       <SessionProvider session={session} refetchInterval={0}>
         <QueryClientProvider client={queryClient}>
           <Hydrate state={pageProps?.dehydratedState}>
-            <ChakraProvider theme={theme}>
+            <Chakra cookies={cookies}>
               <PageComponent Component={Component} pageProps={pageProps} router={router} />
-            </ChakraProvider>
+            </Chakra>
           </Hydrate>
         </QueryClientProvider>
       </SessionProvider>
