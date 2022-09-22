@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { apiRequireAdmin, requirePost } from '../../utils/auth';
-import { LogService } from '../../utils/services/LogService';
+import { LogService } from '../../utils/services';
 import { LogLength } from '../../utils/types/LogEntry';
 
 const logs = async (req: NextApiRequest, res: NextApiResponse) => {

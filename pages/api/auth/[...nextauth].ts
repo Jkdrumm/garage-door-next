@@ -2,7 +2,7 @@ import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { MongoClient } from 'mongodb';
 import { compare } from 'bcryptjs';
-import { UsersService } from '../../../utils/services';
+import { OpenSslService, UsersService } from '../../../utils/services';
 
 const USERNAME_OR_PASSWORD_ERROR_MESSAGE = 'Invalid Username/Password';
 
@@ -52,5 +52,5 @@ export default NextAuth({
       return token;
     }
   },
-  secret: process.env.AUTH_SECRET
+  secret: await OpenSslService.getInstance().getRand()
 });

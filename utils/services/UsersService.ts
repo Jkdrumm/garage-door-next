@@ -7,8 +7,6 @@ export interface UsersCache {
   [id: string]: User;
 }
 
-setTimeout(() => {}, 1000);
-
 export class UsersService {
   private static instance: UsersService;
   private usersCache: UsersCache;

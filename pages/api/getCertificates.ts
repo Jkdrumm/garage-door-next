@@ -2,8 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { apiRequireAdmin } from '../../utils/auth';
 import pkg from '../../package.json';
 import Greenlock from 'greenlock';
-import { DnsService } from '../../utils/services';
-import { LogService } from '../../utils/services/LogService';
+import { DnsService, LogService } from '../../utils/services';
 import { LogEvent } from '../../utils/types/LogEntry';
 
 const getCertificate = async (_req: NextApiRequest, res: NextApiResponse) => {
