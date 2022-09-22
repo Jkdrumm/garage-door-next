@@ -4,6 +4,6 @@
   },
   "github": {
     "release": true,
-    "assets": ["${name}_${version}.zip"]
+    "assets": ["*.zip"]
   }
 }
