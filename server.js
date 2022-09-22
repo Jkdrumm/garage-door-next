@@ -3,6 +3,8 @@ const https = require('https');
 const { readFileSync, readdirSync } = require('fs');
 const next = require('next');
 const express = require('express');
+const { MongoClient } = require('mongodb');
+const openssl = require('openssl-nodejs');
 
 const ports = {
   http: 80,
@@ -31,6 +33,37 @@ const loadOptions = () => {
       key: readFileSync(`.config/greenlock/live/${domainName}/privkey.pem`)
     };
   } else enableHttps = false;
+};
+
+const getSecret = async () => {
+  const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
+  const db = client.db();
+  const settings = await db.collection('settings').findOne();
+  if (settings && settings.nextAuthSecret) {
+    global.NEXTAUTH_SECRET = settings.nextAuthSecret;
+    client.close();
+  } else {
+    // eslint-disable-next-line no-unused-vars
+    let resolver;
+    // eslint-disable-next-line no-unused-vars
+    let rejector;
+    const returnPromise = (resolve, reject) => {
+      resolver = resolve;
+      rejector = reject;
+    };
+    openssl('openssl rand -base64 32', async (err, buffer) => {
+      const error = err.toString();
+      if (error) rejector(error);
+      else {
+        this.rand = buffer.toString();
+        // Save secret
+        await db.collection('settings').updateOne({}, { $set: { nextAuthSecret: this.rand } }, { upsert: true });
+        client.close();
+        resolver();
+      }
+    });
+    return returnPromise;
+  }
 };
 
 try {
@@ -69,31 +102,34 @@ global.startHttps = () => {
 
 const localDomains = process.env.NODE_ENV === 'production' ? ['localhost', 'raspberrypi.local'] : ['localhost'];
 
-app
-  .prepare()
-  .then(() => {
-    server.all('*', (req, res) => {
-      const {
-        headers: { host },
-        url
-      } = req;
-      /**
-       * Redirect to HTTPS under 4 conditions
-       * 1. Attempting to access over HTTP
-       * 2. HTTPS server is configured
-       * 3. Not accesing over local domain names
-       * 4. Not accessing using an IP address
-       */
-      if (
-        !req.secure &&
-        enableHttps &&
-        !localDomains.includes(host.toLowerCase()) &&
-        !/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/.test(host)
-      )
-        res.redirect('https://' + host + url);
-      else handle(req, res);
-    });
-    startHttp();
-    if (enableHttps) startHttps();
-  })
-  .catch(error => console.error(error));
+// The NEXTAUTH_SECRET has to be loaded before the next.js server starts
+getSecret().then(() =>
+  app
+    .prepare()
+    .then(() => {
+      server.all('*', (req, res) => {
+        const {
+          headers: { host },
+          url
+        } = req;
+        /**
+         * Redirect to HTTPS under 4 conditions
+         * 1. Attempting to access over HTTP
+         * 2. HTTPS server is configured
+         * 3. Not accesing over local domain names
+         * 4. Not accessing using an IP address
+         */
+        if (
+          !req.secure &&
+          enableHttps &&
+          !localDomains.includes(host.toLowerCase()) &&
+          !/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/.test(host)
+        )
+          res.redirect('https://' + host + url);
+        else handle(req, res);
+      });
+      startHttp();
+      if (enableHttps) startHttps();
+    })
+    .catch(error => console.error(error))
+);

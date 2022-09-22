@@ -16,4 +16,5 @@ declare global {
   var openSslServiceInstance: OpenSslService;
   var usersServiceInstance: UsersService;
   var webSocketManagerInstance: WebSocketService;
+  var NEXTAUTH_SECRET: string;
 }
