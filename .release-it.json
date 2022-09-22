@@ -4,6 +4,6 @@
   },
   "github": {
     "release": true,
-    "assets": [".next/*"]
+    "assets": ["${name}_${version}.zip"]
   }
 }
