@@ -1,6 +1,28 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Garage Door Web App
 
-## Getting Started
+### What does it do?
+
+This project is meant to serve as a web-based garage door system hosted on a home webserver on a raspberry pi.
+This will allow home-owners to have habitants, family friends, and guests to create personalized accounts and have different ranges of access to the door.
+Here is an example of how different access levels might function:
+
+1. Family - has access to control the garage door 24/7
+2. Family friends - has access to control the garage door between the hours of 8 a.m - 8 p.m. on weekends only
+3. Petsitter - has access to control the garage door for the 2 weeks they are petsitting
+
+### What are the advantages?
+
+- Home Security - No need to panic after leaving the house wondering if the garage door was left open. Sensors accurately determine and let authorized users know if the garage door is open
+- Access is delegated on an as-needed basis, granting and limiting access to the system to only those who need it and only when they need it
+- Decentralized - Since each system is it's own webserver meaining no central server can leak information for all of its' users
+
+### Future Work
+
+- Allowing multiple garage doors connected to one system
+- Android/iOS app with push notifications
+- Self-updating so new deployments can be installed to all systems easily
+
+## Running Locally
 
 First, run the development server:
 
@@ -11,24 +33,3 @@ yarn dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
