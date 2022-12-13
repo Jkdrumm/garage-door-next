@@ -14,14 +14,14 @@ import {
 import axios from 'axios';
 import { Formik, Form, Field } from 'formik';
 import { useState } from 'react';
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CenterBox } from '../components';
 import { useMainLayout } from '../components/layouts';
 import { requireLoggedIn } from '../utils/auth';
 import { useUser } from '../utils/hooks';
 import { validateName, validatePassword } from '../utils/validations';
 
-const Profile = () => {
+function Profile() {
   const { data: user } = useUser();
   const [editMode, setEditMode] = useState<boolean>(false);
 
@@ -44,7 +44,7 @@ const Profile = () => {
     { firstName, lastName, resetPassword }: { firstName: string; lastName: string; resetPassword: () => void }
   ) => {
     resetPassword();
-    queryClient.setQueryData('user', (queryData: any) => {
+    queryClient.setQueryData(['user'], (queryData: any) => {
       const updatedUser = queryData;
       if (firstName) updatedUser.firstName = firstName;
       if (lastName) updatedUser.lastName = lastName;
@@ -199,7 +199,7 @@ const Profile = () => {
       </Formik>
     </CenterBox>
   );
-};
+}
 export default Profile;
 
 export const getServerSideProps = requireLoggedIn();

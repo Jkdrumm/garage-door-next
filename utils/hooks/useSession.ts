@@ -1,6 +1,10 @@
 import { useSession as useNextAuthSession } from 'next-auth/react';
 import type { Session, User } from '../types';
 
+/**
+ * A hook to get the session and user data from NexAuth.
+ * @returns A React hook
+ */
 export const useSession = () => {
   const hook = useNextAuthSession() as SessionContextValue;
   if (hook.data?.user) (hook.data.user as any) = hook.data.user as User;

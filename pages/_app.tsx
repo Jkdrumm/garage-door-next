@@ -1,6 +1,6 @@
 import type { GetLayout } from '../utils/types';
-import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
-import { ReactQueryDevtools } from 'react-query/devtools';
+import { Hydrate, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { NextPage } from 'next/types';
 import { AppProps } from 'next/app';
 import { Chakra } from '../components/util';
@@ -28,7 +28,9 @@ const PageComponent = ({ Component, pageProps, router }: AppPropsWithLayout) => 
 };
 
 export default function App({ Component, pageProps: { session, cookies, ...pageProps }, router }: AppPropsWithLayout) {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () => new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } })
+  );
 
   return (
     <>

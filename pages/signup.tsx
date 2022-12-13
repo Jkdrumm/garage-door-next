@@ -15,12 +15,12 @@ import { Formik, Form, Field } from 'formik';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import { CenterBox, Link } from '../components';
 import { requireLoggedOut } from '../utils/auth';
 import { validateUsername, validatePassword, validateName } from '../utils/validations';
 
-const SignUp = () => {
+function SignUp() {
   const router = useRouter();
   const [signUpError, setSignUpError] = useState<string>();
   const [signUpLoading, setSignUpLoading] = useState<boolean>(false);
@@ -153,7 +153,7 @@ const SignUp = () => {
       </Flex>
     </CenterBox>
   );
-};
+}
 
 export const getServerSideProps = requireLoggedOut();
 

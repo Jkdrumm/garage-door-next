@@ -1,5 +1,11 @@
-import { QueryClient } from 'react-query';
+import { QueryClient } from '@tanstack/react-query';
 import { DnsInfo, DNS_INFO_QUERY_KEY } from '../useDnsInfo';
 
-export const prefetchDnsInfo = (queryClient: QueryClient, dnsInfo: DnsInfo) =>
+/**
+ * Sets the DNS information during prefetching.
+ * @param queryClient {@link QueryClient}
+ * @param dnsInfo The {@link DnsInfo}
+ */
+export function prefetchDnsInfo(queryClient: QueryClient, dnsInfo: DnsInfo) {
   queryClient.setQueryData(DNS_INFO_QUERY_KEY, dnsInfo);
+}

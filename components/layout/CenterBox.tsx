@@ -1,5 +1,15 @@
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
-import { Flex, useColorModeValue, Heading, Divider, useColorMode, Button, Grid, Spacer } from '@chakra-ui/react';
+import {
+  Flex,
+  useColorModeValue,
+  Heading,
+  Divider,
+  useColorMode,
+  Button,
+  Grid,
+  Spacer,
+  forwardRef
+} from '@chakra-ui/react';
 import { useIsMobile } from '../../utils/hooks';
 
 export interface CenterBoxProps {
@@ -8,12 +18,15 @@ export interface CenterBoxProps {
   children: React.ReactNode;
 }
 
-export const CenterBox = ({ title, showColorToggleOnDesktop, children }: CenterBoxProps) => {
+/**
+ * A centered box for displaying the main page content.
+ */
+export const CenterBox = forwardRef(({ title, showColorToggleOnDesktop, children, ...props }, ref) => {
   const isMobile = useIsMobile();
   const { toggleColorMode } = useColorMode();
   const themeIcon = useColorModeValue(<MoonIcon w="1.25em" h="1.25em" />, <SunIcon w="1.25em" h="1.25em" />);
   return (
-    <Flex width="inherit" height="100%" direction="column" align="center">
+    <Flex ref={ref} width="inherit" height="100%" direction="column" align="center" {...props}>
       <Flex
         mt={{ base: '33.33%', md: '250px' }}
         borderRadius="20px"
@@ -43,4 +56,4 @@ export const CenterBox = ({ title, showColorToggleOnDesktop, children }: CenterB
       </Flex>
     </Flex>
   );
-};
+});

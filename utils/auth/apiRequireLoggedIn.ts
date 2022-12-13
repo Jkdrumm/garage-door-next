@@ -1,9 +1,13 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiHandler, NextApiRequest, NextApiResponse } from 'next';
 import { getUser } from './get';
 
-export const apiRequireLoggedIn =
-  (handler: (req: NextApiRequest, res: NextApiResponse) => void | Promise<void>) =>
-  async (req: NextApiRequest, res: NextApiResponse) => {
+/**
+ * Function wrapper to require being logged in for API calls.
+ * @param handler The API handler to wrap
+ * @returns A {@link NextApiHandler}
+ */
+export function apiRequireLoggedIn(handler: NextApiHandler) {
+  return async function (req: NextApiRequest, res: NextApiResponse) {
     try {
       await getUser(req);
       handler(req, res);
@@ -11,3 +15,4 @@ export const apiRequireLoggedIn =
       res.status(401).end();
     }
   };
+}

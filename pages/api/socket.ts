@@ -5,7 +5,13 @@ import { WebSocketService } from '../../utils/services';
 import { apiRequireLoggedIn } from '../../utils/auth';
 import { getAdminLevel, getSession, getUser } from '../../utils/auth/get';
 
-const socket = async (req: NextApiRequest, res: SocketApiResponse) => {
+/**
+ * API endpoint to open a websocket.
+ * Requires being logged in.
+ * @param req {@link NextApiRequest}
+ * @param res {@link NextApiResponse}
+ */
+async function socket(req: NextApiRequest, res: SocketApiResponse) {
   const { expires } = (await getSession({ req })) ?? { expires: '' };
   const { id } = await getUser(req);
   const adminLevel = await getAdminLevel(req);
@@ -20,7 +26,7 @@ const socket = async (req: NextApiRequest, res: SocketApiResponse) => {
     WebSocketService.getInstance().addSocket(socket, id, adminLevel, expires)
   );
   res.end();
-};
+}
 
 export default apiRequireLoggedIn(socket as any);
 

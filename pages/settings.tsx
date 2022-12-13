@@ -28,7 +28,7 @@ import {
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import { useState } from 'react';
-import { QueryClient, dehydrate, useMutation, useQueryClient } from 'react-query';
+import { QueryClient, dehydrate, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from '../components';
 import { useMainLayout } from '../components/layouts';
 import { requireAdmin } from '../utils/auth';
@@ -37,7 +37,7 @@ import { prefetchDnsInfo } from '../utils/hooks/prefetch';
 import { DnsService } from '../utils/services';
 import { validateDomain, validateApiSecret, validateApiKey } from '../utils/validations';
 
-const Settings = () => {
+function Settings() {
   const { isOpen: isOpenDNS, onOpen: onOpenDNS, onClose: onCloseDNS } = useDisclosure();
   const isMobile = useIsMobile();
   const toast = useToast();
@@ -58,7 +58,7 @@ const Settings = () => {
       doneSubmitting: () => void;
     }
   ) => {
-    queryClient.setQueryData('dnsInfo', (queryData: any) => ({ ...queryData, isLoggedIn: true }));
+    queryClient.setQueryData(['dnsInfo'], (queryData: any) => ({ ...queryData, isLoggedIn: true }));
     doneSubmitting();
     toast({
       title: 'DNS Configuration Updated',
@@ -106,7 +106,7 @@ const Settings = () => {
 
   const configureCertificatesSuccess = () => {
     setLoadingCertificates(false);
-    queryClient.setQueryData('dnsInfo', (queryData: any) => ({ ...queryData, isRunningHttps: true }));
+    queryClient.setQueryData(['dnsInfo'], (queryData: any) => ({ ...queryData, isRunningHttps: true }));
     toast({
       title: 'Certificates Configured',
       status: 'success',
@@ -292,7 +292,7 @@ const Settings = () => {
       </Drawer>
     </>
   );
-};
+}
 
 export const getServerSideProps = requireAdmin(async () => {
   const queryClient = new QueryClient();

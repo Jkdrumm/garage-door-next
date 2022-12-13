@@ -2,17 +2,25 @@ import { MongoClient } from 'mongodb';
 import { LogEntryResult, LogEvent, LogLength } from '../types/LogEntry';
 
 export class LogService {
-  private static instance: LogService;
-
   private constructor() {
     this.addEntry(LogEvent.BOOT, {});
   }
 
+  /**
+   * Get the Singleton instance of this class
+   * @returns The singleton instance
+   */
   public static getInstance(): LogService {
     if (!global.logServiceInstance) global.logServiceInstance = new LogService();
     return global.logServiceInstance;
   }
 
+  /**
+   * Gets all logs from the DB starting from a date through a specified time window.
+   * @param date The date to start searching from
+   * @param length The length of time to search back from the start date
+   * @returns
+   */
   public async getLogs(date: string, length: LogLength) {
     const startDate = new Date(date);
     startDate.setDate(startDate.getDate() + 1);
@@ -43,6 +51,11 @@ export class LogService {
     return returnPromise;
   }
 
+  /**
+   * Adds a log entry to the DB
+   * @param event The type of event
+   * @param settings Additional information to add to the log
+   */
   public async addEntry(
     event: LogEvent,
     { oldValue, newValue, userId, username, firstName, lastName }: Omit<LogEntryResult, 'id' | 'event' | 'date'>

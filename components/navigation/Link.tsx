@@ -1,11 +1,38 @@
-import React from 'react';
-import { Link as ChakraLink, LinkProps as ChakraLinkProps } from '@chakra-ui/react';
+import {
+  ChakraProps,
+  forwardRef,
+  Link as ChakraLink,
+  LinkProps as ChakraLinkProps,
+  useStyleConfig
+} from '@chakra-ui/react';
 import NextLink from 'next/link';
+import type { LinkProps as NextLinkProps } from 'next/dist/client/link';
 
-export interface LinkProps extends ChakraLinkProps {}
+// Next.js links also have an 'as' property, so we'll rename it so that it is still available
+export type LinkProps = Omit<NextLinkProps, 'as'> &
+  ChakraLinkProps & {
+    nextAs?: NextLinkProps['as'];
+  };
 
-export const Link = ({ href, ...rest }: LinkProps) => (
-  <NextLink href={href?.toString() || ''} passHref>
-    <ChakraLink {...rest} />
-  </NextLink>
+/**
+ * A Chakra styled {@link https://nextjs.org/docs/api-reference/next/link NextLink}
+ */
+export const Link = forwardRef<LinkProps & ChakraProps, 'a'>(
+  ({ href, nextAs, replace, scroll, shallow, prefetch, children, ...props }, ref) => {
+    const styles = useStyleConfig('Link', props) as ChakraProps & LinkProps;
+    return (
+      <NextLink
+        passHref
+        href={href}
+        as={nextAs}
+        replace={replace}
+        scroll={scroll}
+        shallow={shallow}
+        prefetch={prefetch}>
+        <ChakraLink ref={ref} {...styles} {...props}>
+          {children}
+        </ChakraLink>
+      </NextLink>
+    );
+  }
 );

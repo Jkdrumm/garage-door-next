@@ -1,3 +1,6 @@
+/**
+ * The Admin Levels for users.
+ */
 export enum AdminLevel {
   ACCOUNT,
   VIEWER,

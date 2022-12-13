@@ -1,9 +1,14 @@
 import type { GetServerSideProps } from 'next/types';
 import { getUserFromCache } from './get';
 
-export const requireLoggedOut =
-  (getServerSideProps?: GetServerSideProps): GetServerSideProps =>
-  async context => {
+/**
+ * Requires being logged out for page access.
+ * If logged in, will redirect to the home page.
+ * @param getServerSideProps {@link GetServerSideProps}
+ * @returns GetServerSideProps
+ */
+export function requireLoggedOut(getServerSideProps?: GetServerSideProps): GetServerSideProps {
+  return async function (context) {
     try {
       await getUserFromCache(context.req);
       return {
@@ -17,3 +22,4 @@ export const requireLoggedOut =
       return { props: { cookies: context.req.headers.cookie ?? '' } };
     }
   };
+}
