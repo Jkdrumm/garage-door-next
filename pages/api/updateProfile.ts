@@ -1,11 +1,17 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { MongoClient, ObjectId } from 'mongodb';
-import { requirePost } from '../../utils/auth';
+import { apiRequireLoggedIn, requirePost } from '../../utils/auth';
 import { UsersService } from '../../utils/services';
 import { getUserFromCache } from '../../utils/auth/get';
 import { hash } from 'bcryptjs';
 
-const updateProfile = async (req: NextApiRequest, res: NextApiResponse) => {
+/**
+ * API endpoint to update a user's own profile.
+ * Requires being logged in.
+ * @param req {@link NextApiRequest}
+ * @param res {@link NextApiResponse}
+ */
+async function updateProfile(req: NextApiRequest, res: NextApiResponse) {
   const { firstName, lastName, password } = req.body;
   const user = await getUserFromCache(req);
   const hasFirstName = firstName !== undefined;
@@ -26,6 +32,6 @@ const updateProfile = async (req: NextApiRequest, res: NextApiResponse) => {
     res.status(200).end();
   } else res.status(400).end();
   client.close();
-};
+}
 
-export default requirePost(updateProfile);
+export default requirePost(apiRequireLoggedIn(updateProfile));

@@ -1,7 +1,7 @@
-import type { Message, PageWithLayout } from '../utils/types';
+import type { Message } from '../utils/types';
 import { Button, Flex, Text } from '@chakra-ui/react';
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { useQuery, useQueryClient } from 'react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMainLayout } from '../components/layouts';
 import { AdminLevel, GarageAction, GarageEvent, GarageState } from '../utils/enums';
 import { CenterBox } from '../components';
@@ -13,7 +13,7 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 import io from 'socket.io-client';
 
-const Home: PageWithLayout = () => {
+function Home() {
   const [doorState, setDoorState] = useState<GarageState>(GarageState.FETCHING);
   const [adminLevel, setAdminLevel] = useState<AdminLevel>(AdminLevel.ACCOUNT);
   const [buttonLoading, setButtonLoading] = useState<boolean>(true);
@@ -31,7 +31,7 @@ const Home: PageWithLayout = () => {
     return stopWebSocket;
   }, [stopWebSocket]);
 
-  useQuery('socket', () => axios.post('/api/socket'), {
+  useQuery(['socket'], () => axios.post('/api/socket'), {
     refetchOnWindowFocus: false,
     retry: false,
     onSuccess: () => socketInitializer()
@@ -67,8 +67,8 @@ const Home: PageWithLayout = () => {
             break;
           case GarageEvent.ADMIN:
             setAdminLevel(message);
-            queryClient.setQueryData('adminLevel', message);
-            queryClient.invalidateQueries('notifications');
+            queryClient.setQueryData(['adminLevel'], message);
+            queryClient.invalidateQueries(['notifications']);
             break;
           case GarageEvent.SESSION_TIMEOUT:
             timeoutWebsocket();
@@ -156,7 +156,7 @@ const Home: PageWithLayout = () => {
       </Button>
     </CenterBox>
   );
-};
+}
 
 Home.getLayout = useMainLayout;
 

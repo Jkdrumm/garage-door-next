@@ -5,7 +5,13 @@ import Greenlock from 'greenlock';
 import { DnsService, LogService } from '../../utils/services';
 import { LogEvent } from '../../utils/types/LogEntry';
 
-const getCertificate = async (_req: NextApiRequest, res: NextApiResponse) => {
+/**
+ * API endpoint to get new certificates from greenlock.
+ * Requires admin privileges.
+ * @param _req {@link NextApiRequest}
+ * @param res {@link NextApiResponse}
+ */
+async function getCertificate(_req: NextApiRequest, res: NextApiResponse) {
   try {
     const dnsService = DnsService.getInstance();
     if (!dnsService.getIsLoggedIn()) {
@@ -66,6 +72,6 @@ const getCertificate = async (_req: NextApiRequest, res: NextApiResponse) => {
     console.error(error);
     res.status(400).end();
   }
-};
+}
 
 export default apiRequireAdmin(getCertificate);

@@ -3,7 +3,13 @@ import { MongoClient, ObjectId } from 'mongodb';
 import { apiRequireAdmin, requirePost } from '../../utils/auth';
 import { UsersService } from '../../utils/services';
 
-const deleteUser = async (req: NextApiRequest, res: NextApiResponse) => {
+/**
+ * API endpoint to delete a user.
+ * Requires admin privileges.
+ * @param req {@link NextApiRequest}
+ * @param res {@link NextApiResponse}
+ */
+async function deleteUser(req: NextApiRequest, res: NextApiResponse) {
   const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
   const db = client.db();
   const { id } = req.body;
@@ -13,6 +19,6 @@ const deleteUser = async (req: NextApiRequest, res: NextApiResponse) => {
     res.status(200).end();
   } else res.status(400).end();
   client.close();
-};
+}
 
 export default requirePost(apiRequireAdmin(deleteUser));

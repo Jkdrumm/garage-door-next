@@ -1,13 +1,18 @@
 import type { GetServerSideProps } from 'next/types';
-import { dehydrate, QueryClient } from 'react-query';
+import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { AdminLevel } from '../enums';
 import { prefetchAdminLevel, prefetchNotificationCount, prefetchUser } from '../hooks/prefetch';
 import { UsersService } from '../services';
 import { getUserFromCache } from './get';
 
-export const requireAdmin =
-  (getServerSideProps?: GetServerSideProps): GetServerSideProps =>
-  async context => {
+/**
+ * Requires admin access for pages.
+ * If unauthorized, will redirect to the home page.
+ * @param getServerSideProps {@link GetServerSideProps}
+ * @returns GetServerSideProps
+ */
+export function requireAdmin(getServerSideProps?: GetServerSideProps): GetServerSideProps {
+  return async function (context) {
     try {
       const user = await getUserFromCache(context.req);
       if (user.adminLevel < AdminLevel.ADMIN) throw new Error('Unauthorized');
@@ -41,3 +46,4 @@ export const requireAdmin =
       };
     }
   };
+}

@@ -3,7 +3,13 @@ import { apiRequireAdmin, requirePost } from '../../utils/auth';
 import { LogService } from '../../utils/services';
 import { LogLength } from '../../utils/types/LogEntry';
 
-const logs = async (req: NextApiRequest, res: NextApiResponse) => {
+/**
+ * API endpoint to get server logs.
+ * Requires admin privileges.
+ * @param req {@link NextApiRequest}
+ * @param res {@link NextApiResponse}
+ */
+async function logs(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { date, length } = req.body as { date: string; length: LogLength };
     const logs = await LogService.getInstance().getLogs(date, length);
@@ -11,7 +17,7 @@ const logs = async (req: NextApiRequest, res: NextApiResponse) => {
   } catch (e) {
     res.status(400).end();
   }
-};
+}
 
 export default requirePost(apiRequireAdmin(logs));
 

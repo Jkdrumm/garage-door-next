@@ -1,10 +1,14 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse, NextApiHandler } from 'next';
 import { AdminLevel } from '../enums';
 import { getAdminLevel } from './get/getAdminLevel';
 
-export const apiRequireAdmin =
-  (handler: (req: NextApiRequest, res: NextApiResponse) => void | Promise<void>) =>
-  async (req: NextApiRequest, res: NextApiResponse) => {
+/**
+ * Function wrapper to require admin privileges for API calls.
+ * @param handler The API handler to wrap
+ * @returns A {@link NextApiHandler}
+ */
+export function apiRequireAdmin(handler: NextApiHandler) {
+  return async function (req: NextApiRequest, res: NextApiResponse) {
     try {
       const adminLevel = await getAdminLevel(req);
       if (adminLevel < AdminLevel.ADMIN) throw new Error('Not an admin');
@@ -13,3 +17,4 @@ export const apiRequireAdmin =
       res.status(401).end();
     }
   };
+}

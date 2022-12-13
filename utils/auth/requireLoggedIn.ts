@@ -1,12 +1,17 @@
 import type { GetServerSideProps } from 'next/types';
-import { dehydrate, QueryClient } from 'react-query';
+import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { prefetchAdminLevel, prefetchNotificationCount, prefetchUser } from '../hooks/prefetch';
 import { UsersService } from '../services';
 import { getUserFromCache } from './get';
 
-export const requireLoggedIn =
-  (getServerSideProps?: GetServerSideProps): GetServerSideProps =>
-  async context => {
+/**
+ * Requires being logged in for page access.
+ * If logged out, will redirect to the URL origin.
+ * @param getServerSideProps {@link GetServerSideProps}
+ * @returns GetServerSideProps
+ */
+export function requireLoggedIn(getServerSideProps?: GetServerSideProps): GetServerSideProps {
+  return async function (context) {
     try {
       const user = await getUserFromCache(context.req);
       const queryClient = new QueryClient();
@@ -39,3 +44,4 @@ export const requireLoggedIn =
       };
     }
   };
+}

@@ -33,7 +33,7 @@ import type { User } from '../utils/types';
 import TextTransition, { presets } from 'react-text-transition';
 import { useRef, useState } from 'react';
 import { FiInfo } from 'react-icons/fi';
-import { dehydrate, QueryClient, useMutation, useQueryClient } from 'react-query';
+import { dehydrate, QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CenterBox } from '../components';
 import { useMainLayout } from '../components/layouts';
 import { requireAdmin } from '../utils/auth';
@@ -50,7 +50,7 @@ interface AdminButtonDetails {
   description: string;
 }
 
-const UserSettings = () => {
+function UserSettings() {
   const { data: user } = useUser();
   const { data: users } = useUsers();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -70,15 +70,15 @@ const UserSettings = () => {
   const timerIdRef = useRef<NodeJS.Timeout>();
 
   const updateUserSuccess = () => {
-    queryClient.setQueryData('users', (queryData: any) => {
+    queryClient.setQueryData(['users'], (queryData: any) => {
       const updatedUser = queryData.find((user: User) => user.id === selectedUser?.id);
       if (updatedUser) updatedUser.adminLevel = selectedLevel;
       return queryData;
     });
     if (selectedLevel === AdminLevel.ACCOUNT)
-      queryClient.setQueryData('notifications', (queryData: any) => queryData + 1);
+      queryClient.setQueryData(['notifications'], (queryData: any) => queryData + 1);
     else if (oldLevel === AdminLevel.ACCOUNT)
-      queryClient.setQueryData('notifications', (queryData: any) => queryData - 1);
+      queryClient.setQueryData(['notifications'], (queryData: any) => queryData - 1);
     onClose();
     toast({
       title: 'User updated',
@@ -106,11 +106,11 @@ const UserSettings = () => {
   );
 
   const deleteUserSuccess = () => {
-    queryClient.setQueryData('users', (queryData: any) => {
+    queryClient.setQueryData(['users'], (queryData: any) => {
       const filteredData = queryData.filter((user: User) => user.id !== selectedUser?.id);
       return filteredData;
     });
-    if (oldLevel === AdminLevel.ACCOUNT) queryClient.setQueryData('notifications', (queryData: any) => queryData - 1);
+    if (oldLevel === AdminLevel.ACCOUNT) queryClient.setQueryData(['notifications'], (queryData: any) => queryData - 1);
     onClose();
     toast({
       title: 'User deleted',
@@ -354,7 +354,7 @@ const UserSettings = () => {
       </Drawer>
     </>
   );
-};
+}
 
 export const getServerSideProps = requireAdmin(async () => {
   const queryClient = new QueryClient();

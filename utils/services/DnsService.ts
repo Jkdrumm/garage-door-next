@@ -4,8 +4,6 @@ import { LogEvent } from '../types/LogEntry';
 import { LogService } from './LogService';
 
 export class DnsService {
-  private static instance: DnsService;
-
   private key: string | null;
   private secret: string | null;
   private hostname: string | null;
@@ -23,6 +21,9 @@ export class DnsService {
     this.loadDNS();
   }
 
+  /**
+   * Loads the DNS settings from the local MongoDB instance and logs in to GoDaddy.
+   */
   private loadDNS = async () => {
     const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
     const db = client.db();
@@ -38,11 +39,22 @@ export class DnsService {
     }
   };
 
+  /**
+   * Get the Singleton instance of this class
+   * @returns The singleton instance
+   */
   public static getInstance(): DnsService {
     if (!global.dnsServiceInstance) global.dnsServiceInstance = new DnsService();
     return global.dnsServiceInstance;
   }
 
+  /**
+   * Logs-in to GoDaddy.
+   * @param newLogin If this is a new login or not
+   * @param key The API key
+   * @param secret The API secret key
+   * @param hostname The hostname
+   */
   private async login(
     newLogin: boolean = false,
     key: string = this.key ?? '',
@@ -64,6 +76,12 @@ export class DnsService {
     this.refreshTimer = setTimeout(this.login, 3600000);
   }
 
+  /**
+   * Handles a new login to GoDaddy
+   * @param key The API key
+   * @param secret The API secret key
+   * @param hostname The hostname
+   */
   public async newLogin(key: string, secret: string, hostname: string) {
     await this.login(true, key, secret, hostname);
     const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
@@ -77,24 +95,44 @@ export class DnsService {
     await LogService.getInstance().addEntry(LogEvent.DNS_UPDATE, {});
   }
 
+  /**
+   * Gets the currently loaded API key.
+   * @returns The API key
+   */
   public getKey() {
     return this.key;
   }
 
+  /**
+   * Gets the currently loaded secret key.
+   * @returns The secret key
+   */
   public getSecret() {
     return this.secret;
   }
 
+  /**
+   * Gets the currently loaded hostname.
+   * @returns The hostname
+   */
   public getHostname() {
     return this.hostname;
   }
 
+  /**
+   * Gets if the system is logged in to GoDaddy.
+   * @returns The login state
+   */
   public getIsLoggedIn() {
     return this.isLoggedIn;
   }
 
+  /**
+   * Gets if the server is running on HTTPS.
+   * @returns The HTTPS running state
+   */
   public getIsRunningHttps() {
-    return (global as any).httpsStarted ?? false;
+    return global.httpsStarted ?? false;
   }
 }
 

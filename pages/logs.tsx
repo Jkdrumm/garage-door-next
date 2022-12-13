@@ -20,7 +20,7 @@ import { useLogs } from '../utils/hooks';
 import { SingleDatepicker } from 'chakra-dayzed-datepicker';
 import { LogLength } from '../utils/types/LogEntry';
 
-const Logs = () => {
+function Logs() {
   const todayFormatted = new Date().toLocaleDateString();
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -89,7 +89,7 @@ const Logs = () => {
       )}
     </Container>
   );
-};
+}
 
 export default Logs;
 

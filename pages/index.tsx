@@ -18,7 +18,7 @@ import { useRouter } from 'next/router';
 import { requireLoggedOut } from '../utils/auth';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 
-const Index = () => {
+function Index() {
   const router = useRouter();
   const [loginError, setLoginError] = useState<string>();
   const [loginLoading, setLoginLoading] = useState<boolean>(false);
@@ -40,7 +40,7 @@ const Index = () => {
             setLoginLoading(false);
           } else router.push('/home');
         }}>
-        {props => (
+        {({ handleSubmit }) => (
           <Form>
             <Flex direction="column" width="inherit" align="center">
               <Field name="username" validate={validateUsername}>
@@ -86,7 +86,7 @@ const Index = () => {
                 width="75%"
                 height="64px"
                 isLoading={loginLoading}
-                onClick={() => props.handleSubmit()}>
+                onClick={() => handleSubmit()}>
                 Login
               </Button>
             </Flex>
@@ -98,7 +98,7 @@ const Index = () => {
       </Link>
     </CenterBox>
   );
-};
+}
 
 export const getServerSideProps = requireLoggedOut();
 

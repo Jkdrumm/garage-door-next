@@ -8,7 +8,11 @@ import type {
   WebSocketService
 } from '../services';
 
+/**
+ * This is where to declare global variables for TypeScript intellisense.
+ */
 declare global {
+  var httpsStarted: boolean;
   var startHttps: () => void;
   var dnsServiceInstance: DnsService;
   var garageDoorServiceInstance: GarageDoorService;

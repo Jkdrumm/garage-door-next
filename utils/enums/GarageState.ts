@@ -1,3 +1,6 @@
+/**
+ * The possible states for the garage door.
+ */
 export enum GarageState {
   OPEN,
   CLOSED,

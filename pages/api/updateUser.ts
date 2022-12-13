@@ -4,7 +4,13 @@ import { apiRequireAdmin, requirePost } from '../../utils/auth';
 import { UsersService } from '../../utils/services';
 import { getUserFromCache } from '../../utils/auth/get';
 
-const updateUser = async (req: NextApiRequest, res: NextApiResponse) => {
+/**
+ * API endpoint to update a user.
+ * Requires admin privileges.
+ * @param req {@link NextApiRequest}
+ * @param res {@link NextApiResponse}
+ */
+async function updateUser(req: NextApiRequest, res: NextApiResponse) {
   const { id, adminLevel } = req.body;
   const user = await getUserFromCache(req);
   if (user.id === id) res.status(400).json('Cannot update admin level of own user.');
@@ -19,6 +25,6 @@ const updateUser = async (req: NextApiRequest, res: NextApiResponse) => {
     res.status(200).end();
   } else res.status(400).end();
   client.close();
-};
+}
 
 export default requirePost(apiRequireAdmin(updateUser));
