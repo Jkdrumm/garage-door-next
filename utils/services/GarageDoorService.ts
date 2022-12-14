@@ -12,29 +12,26 @@ export class GarageDoorService {
     if (process.env.NODE_ENV === 'development') this.changeState(GarageState.CLOSED);
     else {
       this.doorState = GarageState.FETCHING;
-      const opener = new Gpio(2, 'in', 'both');
-      const closer = new Gpio(3, 'in', 'both');
-      setInterval(() => {
-        const openValue = opener.readSync();
-        const closeValue = closer.readSync();
-        console.log(openValue, closeValue);
-        if (!openValue && !closeValue) this.changeState(GarageState.UNKNOWN);
-        else if (openValue) this.changeState(GarageState.OPEN);
+      const sensorSettings = { activeLow: true, debounceTimeout: 250 };
+      const opener = new Gpio(2, 'in', 'both', sensorSettings);
+      const closer = new Gpio(3, 'in', 'both', sensorSettings);
+      // Listen for changes
+      opener.watch((error: any, value: 0 | 1) => {
+        if (error) console.error(error);
+        if (value === Gpio.LOW) this.changeState(GarageState.UNKNOWN);
+        else this.changeState(GarageState.OPEN);
+      });
+      closer.watch((error: any, value: 0 | 1) => {
+        if (error) console.error(error);
+        if (value === Gpio.LOW) this.changeState(GarageState.UNKNOWN);
         else this.changeState(GarageState.CLOSED);
-      }, 250);
-      closer.watch((_, value) => console.log(value));
-      // opener.watch((error: any, value: 0 | 1) => {
-      //   if (error) console.error(error);
-      //   if (value === Gpio.LOW) this.changeState(GarageState.UNKNOWN);
-      //   else this.changeState(GarageState.CLOSED);
-      // });
-      // closer.watch((error: any, value: 0 | 1) => {
-      //   if (error) console.error(error);
-      //   if (value === Gpio.LOW) this.changeState(GarageState.UNKNOWN);
-      //   else this.changeState(GarageState.OPEN);
-      // });
-      // const openValue = opener.readSync();
-      // const closeValue = closer.readSync();
+      });
+      // Set the initial value
+      const openValue = opener.readSync();
+      const closeValue = closer.readSync();
+      if (openValue) this.changeState(GarageState.OPEN);
+      else if (closeValue) this.changeState(GarageState.CLOSED);
+      else this.changeState(GarageState.UNKNOWN);
     }
   }
 
@@ -82,7 +79,6 @@ export class GarageDoorService {
    * @param state The state to change the door to
    */
   private changeState(state: GarageState) {
-    console.log(`CHANGING TO ${GarageState[state]}`);
     if (state !== this.doorState) {
       WebSocketService.getInstance().notifyDoorState(state);
       LogService.getInstance().addEntry(LogEvent.STATE_CHANGE, { oldValue: this.doorState, newValue: state });
