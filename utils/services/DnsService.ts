@@ -2,6 +2,8 @@ import { MongoClient } from 'mongodb';
 import { getCurrentIp, updateRecords } from 'godaddy-dns';
 import { LogEvent } from '../types/LogEntry';
 import { LogService } from './LogService';
+import Greenlock from 'greenlock';
+import pkg from '../../package.json';
 
 export class DnsService {
   private key: string | null;
@@ -71,9 +73,22 @@ export class DnsService {
         records: [{ type: 'A', name: '@', ttl: 3600 }]
       });
       this.isLoggedIn = true;
+      this.setCertificateTimer();
     }
     if (this.refreshTimer) clearTimeout(this.refreshTimer);
     this.refreshTimer = setTimeout(this.login, 3600000);
+  }
+
+  private setCertificateTimer() {
+    // JavaScript limits timers to 32-bit integers, which only allows for ~25 day timers.
+    // Greenlock gives certificates valid for ~90 days.
+    const MAX_TIMER_LENGTH = 2147483647;
+    if (global.certificateRefreshTime > MAX_TIMER_LENGTH) {
+      setTimeout(() => {
+        global.certificateRefreshTime -= MAX_TIMER_LENGTH;
+        this.setCertificateTimer();
+      }, MAX_TIMER_LENGTH);
+    } else setTimeout(() => this.getNewCertificates(), global.certificateRefreshTime);
   }
 
   /**
@@ -133,6 +148,60 @@ export class DnsService {
    */
   public getIsRunningHttps() {
     return global.httpsStarted ?? false;
+  }
+
+  /**
+   * Gets new certificates and restarts the HTTPS server.
+   * @throws Error when unable to get new certificates
+   */
+  public async getNewCertificates() {
+    try {
+      if (!this.isLoggedIn) throw new Error('DNS Login must be configured first');
+
+      const greenlock = Greenlock.create({
+        packageRoot: process.cwd(),
+        configDir: './greenlock.d',
+        packageAgent: pkg.name + '/' + pkg.version,
+        maintainerEmail: pkg.author.email,
+        subscriberEmail: pkg.author.email,
+        staging: process.env.NODE_ENV !== 'production',
+        notify: (event: string, details: any) => {
+          if ('error' === event) {
+            // `details` is an error object in this case
+            console.error(details);
+          }
+        }
+      });
+
+      await greenlock.add({
+        subject: this.hostname,
+        altnames: [this.hostname],
+        agreeToTerms: true,
+        subscriberEmail: pkg.author.email,
+        staging: true,
+        store: {
+          module: 'greenlock-store-fs',
+          basePath: process.cwd() + '/.config/greenlock'
+        },
+        challenges: {
+          'dns-01': {
+            module: 'acme-dns-01-godaddy',
+            key: this.key,
+            secret: this.secret
+          }
+        }
+      });
+
+      const { pems } = await greenlock.get({ servername: this.hostname });
+      if (pems && pems.privkey && pems.cert && pems.chain) {
+        global.startHttps();
+        LogService.getInstance().addEntry(LogEvent.CERTIFICATES, {});
+        this.setCertificateTimer();
+      } else throw new Error('Unable to retreive certificates');
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 }
 
