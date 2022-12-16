@@ -13,6 +13,7 @@ import type {
  */
 declare global {
   var httpsStarted: boolean;
+  var certificateRefreshTime: number;
   var startHttps: () => void;
   var dnsServiceInstance: DnsService;
   var garageDoorServiceInstance: GarageDoorService;

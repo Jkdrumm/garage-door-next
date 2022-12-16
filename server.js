@@ -5,6 +5,7 @@ const next = require('next');
 const express = require('express');
 const { MongoClient } = require('mongodb');
 const openssl = require('openssl-nodejs');
+const { parse } = require('@godd/certificate-parser');
 
 const ports = {
   http: 80,
@@ -20,7 +21,7 @@ let httpsServer;
 let enableHttps = false;
 let options = {};
 
-const loadOptions = () => {
+function loadOptions() {
   const directories = readdirSync('.config/greenlock/live/', { withFileTypes: true }).filter(dirent =>
     dirent.isDirectory()
   );
@@ -32,10 +33,21 @@ const loadOptions = () => {
       ca: readFileSync(`.config/greenlock/live/${domainName}/bundle.pem`),
       key: readFileSync(`.config/greenlock/live/${domainName}/privkey.pem`)
     };
+    const parsedCertificate = parse(options.cert);
+    setCertificateRenewalTimeout(parsedCertificate.validTo);
   } else enableHttps = false;
-};
+}
 
-const getSecret = async () => {
+function setCertificateRenewalTimeout(endDateString) {
+  const endDate = new Date(endDateString);
+  const now = new Date();
+  const millisecondsUntilExpiration = endDate - now;
+  // Give an extra day of buffer
+  const millisecondsUntilRenewall = millisecondsUntilExpiration - 8640000;
+  global.certificateRefreshTime = millisecondsUntilRenewall;
+}
+
+async function getSecret() {
   const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
   const db = client.db();
   const settings = await db.collection('settings').findOne();
@@ -43,9 +55,7 @@ const getSecret = async () => {
     global.NEXTAUTH_SECRET = settings.nextAuthSecret;
     client.close();
   } else {
-    // eslint-disable-next-line no-unused-vars
     let resolver;
-    // eslint-disable-next-line no-unused-vars
     let rejector;
     const returnPromise = (resolve, reject) => {
       resolver = resolve;
@@ -64,14 +74,14 @@ const getSecret = async () => {
     });
     return returnPromise;
   }
-};
+}
 
 try {
   loadOptions();
   // eslint-disable-next-line no-empty
 } catch {}
 
-const startHttps = () => {
+function startHttps() {
   if (httpsServer) {
     httpsServer.removeAllListeners();
     httpsServer.close();
@@ -83,24 +93,24 @@ const startHttps = () => {
     // Restart on crash
     .on('close', startHttps);
   global.httpsStarted = true;
-};
+}
 
-const startHttp = () => {
+function startHttp() {
   http
     .createServer(server)
     .listen(ports.http)
     .on('error', err => console.error(err))
     // Restart on crash
     .on('close', startHttp);
-};
+}
 
 global.httpsStarted = false;
-global.startHttps = () => {
+global.startHttps = function () {
   loadOptions();
   if (enableHttps) startHttps();
 };
 
-const localDomains = process.env.NODE_ENV === 'production' ? ['localhost', 'raspberrypi.local'] : ['localhost'];
+const localDomains = process.env.NODE_ENV === 'production' ? ['localhost', '.local'] : ['localhost'];
 
 // The NEXTAUTH_SECRET has to be loaded before the next.js server starts
 getSecret().then(() =>
@@ -113,7 +123,7 @@ getSecret().then(() =>
           url
         } = req;
         /**
-         * Redirect to HTTPS under 4 conditions
+         * Redirect to HTTPS if meeting all 4 conditions
          * 1. Attempting to access over HTTP
          * 2. HTTPS server is configured
          * 3. Not accesing over local domain names
@@ -122,7 +132,7 @@ getSecret().then(() =>
         if (
           !req.secure &&
           enableHttps &&
-          !localDomains.includes(host.toLowerCase()) &&
+          !localDomains.some(domain => host.toLowerCase().endsWith(domain)) &&
           !/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/.test(host)
         )
           res.redirect('https://' + host + url);

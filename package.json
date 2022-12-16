@@ -20,6 +20,7 @@
   "dependencies": {
     "@chakra-ui/icons": "^2.0.4",
     "@chakra-ui/react": "^2.2.4",
+    "@godd/certificate-parser": "^0.1.0",
     "@greenlock/manager": "^3.1.0",
     "@root/greenlock": "^4.0.5",
     "@tanstack/react-query": "^4.19.1",
