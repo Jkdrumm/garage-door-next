@@ -30,6 +30,7 @@ jobs:
 
       # Step 3: Create a release
       - name: Create release
+        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -44,10 +45,14 @@ jobs:
       - name: Compress files
         run: zip -r release.zip .next server.js
 
-      # Step 4: Upload build artifacts as release assets
+      # Step 5: Upload build artifacts as release assets
       - name: Upload release assets
+        id: upload-release-asset
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: release.zip
-          path: ./release.zip
-          label: Raspberry Pi 4 Build
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release.zip
+          asset_name: release.zip
+          asset_content_type: application/zip
