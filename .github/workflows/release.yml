@@ -8,10 +8,21 @@ on:
 jobs:
   create-release:
     runs-on: self-hosted
+    
+    strategy:
+      matrix:
+        node-version: [16.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+    
     steps:
       # Step 1: Checkout the repository code
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: npm ci
 
       # Step 2: Build the project
       - name: Build project
