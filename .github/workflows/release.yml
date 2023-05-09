@@ -45,4 +45,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: raspberry-pi-4-build
-          path: /garage-door-next/garage-door-next/.next/ | /garage-door-next/garage-door-next/server.js
+          path: |
+            ${{ github.workspace }}/server.js
+            ${{ github.workspace }}/.next/
