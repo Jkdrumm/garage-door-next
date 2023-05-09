@@ -1,0 +1,37 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create-release:
+    runs-on: self-hosted
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Build the project
+      - name: Build project
+        run: npm run build
+
+      # Step 3: Create a release
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: Automated release created by GitHub Actions
+          draft: false
+          prerelease: false
+
+      # Step 4: Upload build artifacts as release assets
+      - name: Upload assets
+        uses: actions/upload-artifact@v3
+        with:
+          name: raspberry-pi-4-build
+          path: .next/ | server.js
