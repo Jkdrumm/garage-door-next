@@ -1,4 +1,4 @@
-name: Create Release
+name: Upload Release Asset
 
 on:
   push:
@@ -39,12 +39,15 @@ jobs:
           body: Automated release created by GitHub Actions
           draft: false
           prerelease: false
+      
+      # Step 4: Compress files
+      - name: Compress files
+        run: zip -r release.zip .next server.js
 
       # Step 4: Upload build artifacts as release assets
-      - name: Upload assets
-        uses: actions/upload-artifact@v3
+      - name: Upload release assets
+        uses: actions/upload-release-asset@v1
         with:
-          name: raspberry-pi-4-build
-          path: |
-            ${{ github.workspace }}/server.js
-            ${{ github.workspace }}/.next/
+          name: release.zip
+          path: ./release.zip
+          label: Raspberry Pi 4 Build
