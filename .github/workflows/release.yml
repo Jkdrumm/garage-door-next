@@ -40,8 +40,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ steps.package.outputs.version }}
-          release_name: Release ${{ steps.package.outputs.version }}
+          tag_name: ${{ steps.package.outputs.version }}
+          release_name: ${{ steps.package.outputs.version }}
           body: Automated release created by GitHub Actions
           draft: false
           prerelease: false
