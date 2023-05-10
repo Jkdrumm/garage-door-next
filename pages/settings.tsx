@@ -19,6 +19,11 @@ import {
   FormLabel,
   Heading,
   Input,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  Skeleton,
   Stack,
   Text,
   useColorModeValue,
@@ -27,15 +32,17 @@ import {
 } from '@chakra-ui/react';
 import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { QueryClient, dehydrate, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from '../components';
 import { useMainLayout } from '../components/layouts';
 import { requireAdmin } from '../utils/auth';
-import { useDnsInfo, useIsMobile } from '../utils/hooks';
+import { useDnsInfo, useGetVersion, useIsMobile } from '../utils/hooks';
 import { prefetchDnsInfo } from '../utils/hooks/prefetch';
 import { DnsService } from '../utils/services';
 import { validateDomain, validateApiSecret, validateApiKey } from '../utils/validations';
+import { useRouter } from 'next/router';
+import pack from '../package.json';
 
 function Settings() {
   const { isOpen: isOpenDNS, onOpen: onOpenDNS, onClose: onCloseDNS } = useDisclosure();
@@ -45,8 +52,45 @@ function Settings() {
   const [loadingCertificates, setLoadingCertificates] = useState<boolean>(false);
   const { data: dnsInfo } = useDnsInfo();
   const queryClient = useQueryClient();
+  const { data: versionInfo, isLoading: versionInfoIsLoading } = useGetVersion();
+  const [timer, setTimer] = useState<number>(10);
+  const [timerStarted, setTimerStarted] = useState(false);
+  const router = useRouter();
 
-  const configureDnsSuccess = (
+  useEffect(() => {
+    if (!timerStarted) return;
+
+    const intervalTimer = setInterval(() => {
+      if (timer > 0) setTimer(time => time - 1);
+      else {
+        clearInterval(intervalTimer);
+        router.reload();
+      }
+    }, 1000);
+
+    return () => clearInterval(intervalTimer);
+  }, [timer, timerStarted, router]);
+
+  const { mutate: downloadUpdate, isLoading: isUpdateLoading } = useMutation(() => axios.post('/api/downloadUpdate'), {
+    onSuccess: () => {
+      toast({
+        title: 'Download Succeeded',
+        status: 'success',
+        position: 'bottom-left',
+        isClosable: true
+      });
+      setTimerStarted(true);
+    },
+    onError: () =>
+      toast({
+        title: 'Download Failed',
+        status: 'error',
+        position: 'bottom-left',
+        isClosable: true
+      })
+  });
+
+  function configureDnsSuccess(
     _data: any,
     {
       doneSubmitting
@@ -57,7 +101,7 @@ function Settings() {
       resetApiInputs: () => void;
       doneSubmitting: () => void;
     }
-  ) => {
+  ) {
     queryClient.setQueryData(['dnsInfo'], (queryData: any) => ({ ...queryData, isLoggedIn: true }));
     doneSubmitting();
     toast({
@@ -67,9 +111,9 @@ function Settings() {
       isClosable: true
     });
     closeDnsDrawer();
-  };
+  }
 
-  const configureDnsError = (
+  function configureDnsError(
     data: any,
     {
       doneSubmitting
@@ -80,10 +124,10 @@ function Settings() {
       resetApiInputs: () => void;
       doneSubmitting: () => void;
     }
-  ) => {
+  ) {
     setDnsSignInError(data.response.data);
     doneSubmitting();
-  };
+  }
 
   const { mutate: configureDNS } = useMutation(
     (params: {
@@ -104,7 +148,7 @@ function Settings() {
     }
   );
 
-  const configureCertificatesSuccess = () => {
+  function configureCertificatesSuccess() {
     setLoadingCertificates(false);
     queryClient.setQueryData(['dnsInfo'], (queryData: any) => ({ ...queryData, isRunningHttps: true }));
     toast({
@@ -113,9 +157,9 @@ function Settings() {
       position: 'bottom-left',
       isClosable: true
     });
-  };
+  }
 
-  const configureCertificatesError = () => {
+  function configureCertificatesError() {
     setLoadingCertificates(false);
     toast({
       title: 'Error updating certificates',
@@ -123,27 +167,59 @@ function Settings() {
       position: 'bottom-left',
       isClosable: true
     });
-  };
+  }
 
   const { mutate: configureCertificates } = useMutation(() => axios.post('/api/getCertificates'), {
     onSuccess: configureCertificatesSuccess,
     onError: configureCertificatesError
   });
 
-  const closeDnsDrawer = () => {
+  function closeDnsDrawer() {
     onCloseDNS();
     setDnsSignInError('');
-  };
+  }
 
   const closeIconSeethroughColor = useColorModeValue('white', 'gray.700');
 
   return (
     <>
+      <Modal isOpen={timerStarted} onClose={() => {}}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader textAlign="center">Restarting in {timer}</ModalHeader>
+        </ModalContent>
+      </Modal>
       <Container maxW="4xl">
         <Heading mb="32px" mt={{ base: '24px', md: '40px' }}>
           Settings
         </Heading>
-        <Stack direction={{ base: 'column', md: 'row' }}>
+        <Flex
+          borderRadius="20px"
+          bg={useColorModeValue('white', 'gray.700')}
+          width="100%"
+          shadow={`0px 0px 32px 0px ${useColorModeValue('#4E4E4E2E', '#000000AA')}`}
+          justify="center"
+          align="center"
+          direction="column"
+          padding="16px 0px"
+          mb="16px">
+          <Text>Version: {pack.version}</Text>
+          <Flex>
+            <Text mr="1">Current Version:</Text>
+            <Skeleton isLoaded={!versionInfoIsLoading} placeholder="0.0.0">
+              {versionInfo}
+            </Skeleton>
+          </Flex>
+          <Button
+            colorScheme="orange"
+            onClick={() => downloadUpdate()}
+            isLoading={isUpdateLoading}
+            // isDisabled={!versionInfoIsLoading && versionInfo !== undefined && versionInfo <= pack.version}
+          >
+            Download Update
+          </Button>
+        </Flex>
+        <Stack direction={{ base: 'column', md: 'row' }} gap="16px">
           <Flex
             borderRadius="20px"
             bg={useColorModeValue('white', 'gray.700')}
@@ -209,7 +285,6 @@ function Settings() {
           </Flex>
         </Stack>
       </Container>
-
       <Drawer isOpen={isOpenDNS} onClose={closeDnsDrawer} placement={isMobile ? 'bottom' : 'right'}>
         <DrawerOverlay />
         <DrawerContent>

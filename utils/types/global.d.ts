@@ -5,6 +5,7 @@ import type {
   LogService,
   OpenSslService,
   UsersService,
+  VersionService,
   WebSocketService
 } from '../services';
 
@@ -20,6 +21,8 @@ declare global {
   var logServiceInstance: LogService;
   var openSslServiceInstance: OpenSslService;
   var usersServiceInstance: UsersService;
+  var versionServiceInstance: VersionService;
   var webSocketManagerInstance: WebSocketService;
   var NEXTAUTH_SECRET: string;
+  var completeUpdate: () => void;
 }
