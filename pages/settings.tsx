@@ -206,9 +206,7 @@ function Settings() {
           <Text>Version: {pack.version}</Text>
           <Flex>
             <Text mr="1">Current Version:</Text>
-            <Skeleton isLoaded={!versionInfoIsLoading} placeholder="0.0.0">
-              {versionInfo}
-            </Skeleton>
+            <Skeleton isLoaded={!versionInfoIsLoading}>{versionInfo ?? '0.0.0'}</Skeleton>
           </Flex>
           <Button
             colorScheme="orange"
