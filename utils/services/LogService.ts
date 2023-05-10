@@ -20,10 +20,15 @@ export class LogService {
       this.addEntry(LogEvent.LOG, { data: this.getMessage(message, ...optionalParams) });
     };
     if (process.env.NODE_ENV === 'development') {
+      console.warn = (message?: any, ...optionalParams: any[]) => {
+        ogConsoleWarn(message, ...optionalParams);
+        if (message === 'Warning: epoll is built for Linux and not intended for usage on Windows_NT.') return;
+        this.addEntry(LogEvent.WARN, { data: this.getMessage(message, ...optionalParams) });
+      };
       console.log = (message?: any, ...optionalParams: any[]) => {
         ogConsoleLog(message, ...optionalParams);
         // Don't save logs for build info in development
-        if (optionalParams[0].startsWith('compil')) return;
+        if (optionalParams[0]?.toString().startsWith('compil')) return;
         this.addEntry(LogEvent.LOG, { data: this.getMessage(message, ...optionalParams) });
       };
     }

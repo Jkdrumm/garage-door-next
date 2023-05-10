@@ -98,10 +98,8 @@ export class VersionService {
         const destinationFilePath = path.join(destinationFolder, file);
 
         // Use the fs.copyFile() method to copy the file
-        fs.copyFile(sourceFilePath, destinationFilePath, err => {
-          if (err) throw err;
-          console.log(`${file} was copied to ${destinationFolder}`);
-        });
+        fs.copyFileSync(sourceFilePath, destinationFilePath);
+        console.log(`${file} was copied to ${destinationFolder}`);
       });
     });
   }
@@ -110,7 +108,7 @@ export class VersionService {
    * Restarts the application from the root.
    */
   public restart() {
-    global.completeUpdate();
+    if (process.env.NODE_ENV === 'production') global.completeUpdate();
   }
 }
 
