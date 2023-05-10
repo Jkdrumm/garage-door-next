@@ -97,6 +97,9 @@ export class VersionService {
         const sourceFilePath = path.join(sourceFolder, file);
         const destinationFilePath = path.join(destinationFolder, file);
 
+        // Set read and write permissions for the file
+        fs.chmodSync(sourceFilePath, 0o666);
+
         // Use the fs.copyFile() method to copy the file
         fs.copyFileSync(sourceFilePath, destinationFilePath);
         console.log(`${file} was copied to ${destinationFolder}`);
