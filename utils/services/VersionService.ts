@@ -89,22 +89,28 @@ export class VersionService {
   public async installUpdate() {
     const sourceFolder = `versions/${this.version}`;
     const destinationFolder = '';
-    fs.readdir(sourceFolder, (err, files) => {
-      if (err) throw err;
+    this.copyDirRecurisveSync(sourceFolder, destinationFolder);
+  }
 
-      // Loop through each file and copy it to the destination folder
-      files.forEach(file => {
-        const sourceFilePath = path.join(sourceFolder, file);
-        const destinationFilePath = path.join(destinationFolder, file);
+  /**
+   * Recursively copies a folder
+   * @param sourceDir The source to copy from
+   * @param destDir The destination to copy to
+   */
+  private copyDirRecurisveSync(sourceDir: string, destDir: string) {
+    const files = fs.readdirSync(sourceDir);
 
-        // Set read and write permissions for the file
-        fs.chmodSync(sourceFilePath, 0o666);
+    for (const file of files) {
+      const sourcePath = path.join(sourceDir, file);
+      const destPath = path.join(destDir, file);
 
-        // Use the fs.copyFile() method to copy the file
-        fs.copyFileSync(sourceFilePath, destinationFilePath);
-        console.log(`${file} was copied to ${destinationFolder}`);
-      });
-    });
+      const stat = fs.statSync(sourcePath);
+
+      if (stat.isDirectory()) {
+        fs.mkdirSync(destPath, { recursive: true });
+        this.copyDirRecurisveSync(sourcePath, destPath);
+      } else fs.copyFileSync(sourcePath, destPath);
+    }
   }
 
   /**
