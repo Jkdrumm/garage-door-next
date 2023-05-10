@@ -58,7 +58,8 @@ export class VersionService {
       writer.on('finish', resolve);
       writer.on('error', reject);
     });
-    decompress(this.assetName, `versions/${this.version}`);
+    if (!fs.existsSync('versions')) fs.mkdirSync('versions');
+    await decompress(this.assetName, `versions/${this.version}`);
     // Delete the zipped file
     fs.unlinkSync(this.assetName);
   }
