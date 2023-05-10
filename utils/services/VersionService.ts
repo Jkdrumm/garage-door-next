@@ -5,7 +5,7 @@ import decompress from 'decompress';
 import archiver from 'archiver';
 
 export class VersionService {
-  private version: string | undefined;
+  private version: string | undefined = '0.1.7';
   private downloadUrl: string | undefined;
   private assetName: string | undefined;
 

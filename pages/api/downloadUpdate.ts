@@ -11,10 +11,10 @@ import { VersionService } from '../../utils/services';
 async function downloadUpdate(_req: NextApiRequest, res: NextApiResponse) {
   try {
     const versionService = VersionService.getInstance();
-    await versionService.downloadNewVersion();
-    // Wait before backing up;
-    await new Promise(r => setTimeout(r, 1000));
-    await versionService.createBackup();
+    // await versionService.downloadNewVersion();
+    // // Wait before backing up;
+    // await new Promise(r => setTimeout(r, 1000));
+    // await versionService.createBackup();
     await versionService.installUpdate();
     res.status(200).end();
     // Restart the application after sending the OK response
