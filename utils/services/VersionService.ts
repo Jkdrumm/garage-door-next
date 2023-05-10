@@ -52,7 +52,7 @@ export class VersionService {
     if (!this.downloadUrl) throw new Error('Download URL is not defined');
     if (!this.assetName) throw new Error('Asset name is not defined');
     const response = await axios({ method: 'get', url: this.downloadUrl, responseType: 'stream' });
-    const writer = fs.createWriteStream(this.version);
+    const writer = fs.createWriteStream(this.assetName);
     response.data.pipe(writer);
     await new Promise((resolve, reject) => {
       writer.on('finish', resolve);
