@@ -16,6 +16,7 @@ async function dnsInfo(_req: NextApiRequest, res: NextApiResponse) {
     const isRunningHttps = dnsService.getIsRunningHttps();
     res.status(200).json({ hostname, isLoggedIn, isRunningHttps });
   } catch (e) {
+    console.error(e);
     res.status(400).end();
   }
 }

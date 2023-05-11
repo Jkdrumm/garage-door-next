@@ -13,6 +13,7 @@ async function getVersion(_req: NextApiRequest, res: NextApiResponse) {
     const version = await VersionService.getInstance().getVersion();
     res.status(200).json(version);
   } catch (e) {
+    console.error(e);
     res.status(400).end();
   }
 }

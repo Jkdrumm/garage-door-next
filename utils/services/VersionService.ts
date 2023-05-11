@@ -3,9 +3,10 @@ import fs from 'fs';
 import path from 'path';
 import decompress from 'decompress';
 import archiver from 'archiver';
+import pack from '../../package.json';
 
 export class VersionService {
-  private version: string | undefined = '0.1.7';
+  private version: string | undefined;
   private downloadUrl: string | undefined;
   private assetName: string | undefined;
 
@@ -25,7 +26,9 @@ export class VersionService {
    * @returns The cached version number (e.g. 1.5.2)
    */
   public async getVersion() {
-    if (this.version) return this.version;
+    // if (this.version) return this.version;
+    // For now, always do a hard check.
+    // TODO: Employ some caching to avoid getting rate limited.
     return this.hardCheckNewVersion();
   }
 
@@ -38,6 +41,8 @@ export class VersionService {
       'https://api.github.com/repos/Jkdrumm/garage-door-next/releases/latest'
     );
     this.version = data.name;
+    // No asset for some reason, default back to saying we have the newest version.
+    if (data.assets.length === 0) return pack.version;
     const asset = data.assets[0];
     this.downloadUrl = asset.browser_download_url;
     this.assetName = asset.name;
@@ -77,7 +82,7 @@ export class VersionService {
     archive.on('warning', console.warn);
     archive.pipe(output);
     archive.glob('.', {
-      ignore: ['versions/**', 'backups/**', 'node_modules/**'],
+      ignore: ['versions/**', 'backups/**', 'node_modules/**', 'greenlock.d/**', 'mongo_key_temp.*', 'mongoserver.asc'],
       pattern: []
     });
     await archive.finalize();

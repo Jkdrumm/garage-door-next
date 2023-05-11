@@ -13,6 +13,7 @@ async function users(_req: NextApiRequest, res: NextApiResponse) {
     const users = getUsers();
     res.status(200).json(users);
   } catch (e) {
+    console.error(e);
     res.status(400).end();
   }
 }

@@ -13,6 +13,7 @@ async function numNotifications(req: NextApiRequest, res: NextApiResponse) {
     const numNotifications = await getNumNotifications(req);
     res.status(200).json(numNotifications);
   } catch (e) {
+    console.error(e);
     res.status(400).end();
   }
 }

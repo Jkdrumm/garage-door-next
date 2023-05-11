@@ -203,17 +203,16 @@ function Settings() {
           direction="column"
           padding="16px 0px"
           mb="16px">
-          <Text>Version: {pack.version}</Text>
+          <Text>Current Version: {pack.version}</Text>
           <Flex>
-            <Text mr="1">Current Version:</Text>
+            <Text mr="1">Newest Version:</Text>
             <Skeleton isLoaded={!versionInfoIsLoading}>{versionInfo ?? '0.0.0'}</Skeleton>
           </Flex>
           <Button
-            colorScheme="orange"
+            colorScheme="cyan"
             onClick={() => downloadUpdate()}
             isLoading={isUpdateLoading}
-            // isDisabled={!versionInfoIsLoading && versionInfo !== undefined && versionInfo <= pack.version}
-          >
+            isDisabled={versionInfoIsLoading || versionInfo === undefined || versionInfo <= pack.version}>
             Download Update
           </Button>
         </Flex>
