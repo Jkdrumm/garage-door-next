@@ -48,7 +48,7 @@ jobs:
       
       # Step 4: Compress files
       - name: Compress files
-        run: zip -r release.zip .next server.js package.json
+        run: zip -r release.zip .next server.js package.json node_modules public
 
       # Step 5: Upload build artifacts as release assets
       - name: Upload release assets
