@@ -13,6 +13,7 @@ async function adminLevel(req: NextApiRequest, res: NextApiResponse) {
     const adminLevel = await getAdminLevel(req);
     res.status(200).json(adminLevel);
   } catch (e) {
+    console.error(e);
     res.status(400).end();
   }
 }

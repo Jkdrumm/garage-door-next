@@ -15,6 +15,7 @@ async function logs(req: NextApiRequest, res: NextApiResponse) {
     const logs = await LogService.getInstance().getLogs(date, length);
     res.status(200).json(logs);
   } catch (e) {
+    console.error(e);
     res.status(400).end();
   }
 }

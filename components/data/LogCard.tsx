@@ -6,6 +6,7 @@ import {
   Badge,
   Box,
   Center,
+  Code,
   Flex,
   useColorModeValue,
   Text,
@@ -27,7 +28,8 @@ export interface LogCardProps extends Omit<LogEntryResult, 'id'> {}
  * A styled Log entry.
  */
 export const LogCard = forwardRef(
-  ({ event, date, oldValue, newValue, username, firstName, lastName, ...props }, ref) => {
+  // eslint-disable-next-line no-unused-vars
+  ({ event, date, oldValue, newValue, username, firstName, lastName, data, userId, ...props }, ref) => {
     const dateObject = new Date(date);
     const timeFormatted = dateObject.toLocaleTimeString();
 
@@ -42,8 +44,15 @@ export const LogCard = forwardRef(
         case LogEvent.STATE_CHANGE:
           return 'green';
         case LogEvent.SHUT_DOWN:
+          return 'grey';
+        case LogEvent.ERROR:
           return 'red';
+        case LogEvent.WARN:
+          return 'orange';
+        case LogEvent.LOG:
+          return 'cyan';
         case LogEvent.BOOT:
+          return 'blue';
         default:
           return 'default';
       }
@@ -79,6 +88,12 @@ export const LogCard = forwardRef(
               </Tbody>
             </Table>
           );
+        case LogEvent.ERROR:
+        case LogEvent.WARN:
+        case LogEvent.LOG: {
+          const { message, optionalParams }: { message: string; optionalParams: any[] } = JSON.parse(data);
+          return <Code>{[message, ...optionalParams].map(item => item)}</Code>;
+        }
         case LogEvent.BOOT:
           return <Text fontWeight="semibold">System Boot</Text>;
         case LogEvent.SHUT_DOWN:

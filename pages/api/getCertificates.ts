@@ -12,7 +12,8 @@ async function getCertificate(_req: NextApiRequest, res: NextApiResponse) {
   try {
     await DnsService.getInstance().getNewCertificates();
     res.status(200).end();
-  } catch (error) {
+  } catch (e) {
+    console.error(e);
     res.status(400).end();
   }
 }

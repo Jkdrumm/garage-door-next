@@ -143,3 +143,7 @@ getSecret().then(() =>
     })
     .catch(error => console.error(error))
 );
+
+global.completeUpdate = function completeUpdate() {
+  process.exit();
+};

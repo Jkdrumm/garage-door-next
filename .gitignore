@@ -16,6 +16,7 @@
 /build
 /.config
 /greenlock.d
+/versions
 
 # misc
 .DS_Store

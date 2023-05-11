@@ -13,6 +13,7 @@ async function user(req: NextApiRequest, res: NextApiResponse) {
     const user = await getUserFromCache(req);
     res.status(200).json(user);
   } catch (e) {
+    console.error(e);
     res.status(400).end();
   }
 }

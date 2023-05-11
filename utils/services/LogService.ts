@@ -4,6 +4,56 @@ import { LogEntryResult, LogEvent, LogLength } from '../types/LogEntry';
 export class LogService {
   private constructor() {
     this.addEntry(LogEvent.BOOT, {});
+    const ogConsoleError = console.error;
+    const ogConsoleWarn = console.warn;
+    const ogConsoleLog = console.log;
+    console.error = (message?: any, ...optionalParams: any[]) => {
+      ogConsoleError(message, ...optionalParams);
+      this.addEntry(LogEvent.ERROR, { data: this.getMessage(message, ...optionalParams) });
+    };
+    console.warn = (message?: any, ...optionalParams: any[]) => {
+      ogConsoleWarn(message, ...optionalParams);
+      this.addEntry(LogEvent.WARN, { data: this.getMessage(message, ...optionalParams) });
+    };
+    console.log = (message?: any, ...optionalParams: any[]) => {
+      ogConsoleLog(message, ...optionalParams);
+      this.addEntry(LogEvent.LOG, { data: this.getMessage(message, ...optionalParams) });
+    };
+    if (process.env.NODE_ENV === 'development') {
+      console.warn = (message?: any, ...optionalParams: any[]) => {
+        ogConsoleWarn(message, ...optionalParams);
+        if (message === 'Warning: epoll is built for Linux and not intended for usage on Windows_NT.') return;
+        this.addEntry(LogEvent.WARN, { data: this.getMessage(message, ...optionalParams) });
+      };
+      console.log = (message?: any, ...optionalParams: any[]) => {
+        ogConsoleLog(message, ...optionalParams);
+        // Don't save logs for build info in development
+        if (optionalParams[0]?.toString().startsWith('compil')) return;
+        this.addEntry(LogEvent.LOG, { data: this.getMessage(message, ...optionalParams) });
+      };
+    }
+  }
+
+  /**
+   * Converts a console message into a format we can store in the DB
+   * @param data The args of log/warn/error
+   * @returns A formatted string
+   */
+  private getMessage(message?: any, ...optionalParams: any[]) {
+    return JSON.stringify({
+      message: message.toString().replace(
+        // eslint-disable-next-line no-control-regex
+        /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
+        ''
+      ),
+      optionalParams: optionalParams.map(element =>
+        element.toString().replace(
+          // eslint-disable-next-line no-control-regex
+          /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
+          ''
+        )
+      )
+    });
   }
 
   /**
@@ -58,13 +108,21 @@ export class LogService {
    */
   public async addEntry(
     event: LogEvent,
-    { oldValue, newValue, userId, username, firstName, lastName }: Omit<LogEntryResult, 'id' | 'event' | 'date'>
+    { oldValue, newValue, userId, username, firstName, lastName, data }: Omit<LogEntryResult, 'id' | 'event' | 'date'>
   ) {
     const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
     const db = client.db();
-    await db
-      .collection('logs')
-      .insertOne({ event, date: new Date().toISOString(), oldValue, newValue, userId, username, firstName, lastName });
+    await db.collection('logs').insertOne({
+      event,
+      date: new Date().toISOString(),
+      oldValue,
+      newValue,
+      userId,
+      username,
+      firstName,
+      lastName,
+      data
+    });
     client.close();
   }
 }
