@@ -19,6 +19,8 @@ export class LogService {
       ogConsoleLog(message, ...optionalParams);
       this.addEntry(LogEvent.LOG, { data: this.getMessage(message, ...optionalParams) });
     };
+
+    // Different logging for development.
     if (process.env.NODE_ENV === 'development') {
       console.warn = (message?: any, ...optionalParams: any[]) => {
         ogConsoleWarn(message, ...optionalParams);
@@ -40,19 +42,11 @@ export class LogService {
    * @returns A formatted string
    */
   private getMessage(message?: any, ...optionalParams: any[]) {
+    // eslint-disable-next-line no-control-regex
+    const regex = /[\u001b\u009b][[()#;?]*(?:\d{1,4}(?:;\d{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
     return JSON.stringify({
-      message: message.toString().replace(
-        // eslint-disable-next-line no-control-regex
-        /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
-        ''
-      ),
-      optionalParams: optionalParams.map(element =>
-        element.toString().replace(
-          // eslint-disable-next-line no-control-regex
-          /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
-          ''
-        )
-      )
+      message: message?.toString().replace(regex, ''),
+      optionalParams: optionalParams.map(element => element?.toString().replace(regex, ''))
     });
   }
 

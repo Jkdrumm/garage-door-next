@@ -98,6 +98,25 @@ export const LogCard = forwardRef(
           return <Text fontWeight="semibold">System Boot</Text>;
         case LogEvent.SHUT_DOWN:
           return <Text fontWeight="semibold">System Shutdown</Text>;
+        case LogEvent.DNS_UPDATE: {
+          const { ip, hostname } = JSON.parse(data);
+          return (
+            <>
+              <Flex direction="row">
+                <Text fontWeight="semibold" mr="1">
+                  IP:{' '}
+                </Text>
+                <Text>{ip}</Text>
+              </Flex>
+              <Flex direction="row">
+                <Text fontWeight="semibold" mr="1">
+                  Hostname:
+                </Text>
+                <Text>{hostname}</Text>
+              </Flex>
+            </>
+          );
+        }
         default:
           return <Text fontWeight="semibold">{event}</Text>;
       }

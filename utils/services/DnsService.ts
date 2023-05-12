@@ -3,6 +3,8 @@ import { getCurrentIp, updateRecords } from 'godaddy-dns';
 import { LogEvent } from '../types/LogEntry';
 import { LogService } from './LogService';
 import Greenlock from 'greenlock';
+import fs from 'fs';
+import path from 'path';
 import pkg from '../../package.json';
 
 export class DnsService {
@@ -15,11 +17,27 @@ export class DnsService {
   private refreshTimer?: ReturnType<typeof setTimeout>;
   private lastRefreshIP?: string;
 
+  private greenlock: any;
+
   private constructor() {
     this.key = null;
     this.secret = null;
     this.hostname = null;
     this.isLoggedIn = false;
+    this.greenlock = Greenlock.create({
+      packageRoot: process.cwd(),
+      configDir: './greenlock.d',
+      packageAgent: pkg.name + '/' + pkg.version,
+      maintainerEmail: pkg.author.email,
+      subscriberEmail: pkg.author.email,
+      staging: process.env.NODE_ENV !== 'production',
+      notify: (event: string, details: any) => {
+        if ('error' === event) {
+          // `details` is an error object in this case
+          console.error(details);
+        }
+      }
+    });
     this.loadDNS();
   }
 
@@ -72,6 +90,7 @@ export class DnsService {
         domain: hostname,
         records: [{ type: 'A', name: '@', ttl: 3600 }]
       });
+      LogService.getInstance().addEntry(LogEvent.DNS_UPDATE, { data: JSON.stringify({ ip: currentIp, hostname }) });
       this.isLoggedIn = true;
       this.setCertificateTimer();
     }
@@ -107,7 +126,7 @@ export class DnsService {
     this.key = key;
     this.secret = secret;
     this.hostname = hostname;
-    await LogService.getInstance().addEntry(LogEvent.DNS_UPDATE, {});
+    this.deleteOldCertificates();
   }
 
   /**
@@ -151,6 +170,24 @@ export class DnsService {
   }
 
   /**
+   * Deletes all certificate information except for the configured hostname's.
+   */
+  private deleteOldCertificates() {
+    const certsDirectory = '.config/greenlock/live/';
+    const certs = fs.readdirSync(certsDirectory);
+    certs.forEach(async cert => {
+      // Delete everything but the configured hostname
+      if (cert === this.hostname) return;
+      // TODO: Investigate removeing. This may not remove from './greenlock.d/config.json'
+      await this.greenlock.remove({ subject: cert });
+      const folderPath = path.join(certsDirectory, cert);
+      const folderContents = fs.readdirSync(folderPath);
+      folderContents.forEach(file => fs.unlinkSync(path.join(folderPath, file)));
+      fs.rmdirSync(folderPath);
+    });
+  }
+
+  /**
    * Gets new certificates and restarts the HTTPS server.
    * @throws Error when unable to get new certificates
    */
@@ -158,22 +195,7 @@ export class DnsService {
     try {
       if (!this.isLoggedIn) throw new Error('DNS Login must be configured first');
 
-      const greenlock = Greenlock.create({
-        packageRoot: process.cwd(),
-        configDir: './greenlock.d',
-        packageAgent: pkg.name + '/' + pkg.version,
-        maintainerEmail: pkg.author.email,
-        subscriberEmail: pkg.author.email,
-        staging: process.env.NODE_ENV !== 'production',
-        notify: (event: string, details: any) => {
-          if ('error' === event) {
-            // `details` is an error object in this case
-            console.error(details);
-          }
-        }
-      });
-
-      await greenlock.add({
+      await this.greenlock.add({
         subject: this.hostname,
         altnames: [this.hostname],
         agreeToTerms: true,
@@ -192,7 +214,7 @@ export class DnsService {
         }
       });
 
-      const { pems } = await greenlock.get({ servername: this.hostname });
+      const { pems } = await this.greenlock.get({ servername: this.hostname });
       if (pems && pems.privkey && pems.cert && pems.chain) {
         global.startHttps();
         LogService.getInstance().addEntry(LogEvent.CERTIFICATES, {});

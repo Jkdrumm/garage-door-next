@@ -132,7 +132,7 @@ getSecret().then(() =>
         if (
           !req.secure &&
           enableHttps &&
-          !localDomains.some(domain => host.toLowerCase().endsWith(domain)) &&
+          !localDomains.some(domain => host?.toLowerCase().endsWith(domain)) &&
           !/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/.test(host)
         )
           res.redirect('https://' + host + url);
