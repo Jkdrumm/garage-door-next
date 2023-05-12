@@ -17,9 +17,7 @@ export default NextAuth({
         const { username, password } = credentials as any;
         const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
         const users = client.db().collection('users');
-        const result = await users.findOne({
-          username: username
-        });
+        const result = await users.findOne({ username: { $regex: new RegExp(username, 'i') } });
         if (!result) {
           client.close();
           throw new Error(USERNAME_OR_PASSWORD_ERROR_MESSAGE);
@@ -40,11 +38,7 @@ export default NextAuth({
   callbacks: {
     session: async ({ session, token }) => {
       const isInCache = UsersService.getInstance().isUserInCache((token as any).user.id);
-      if (isInCache) {
-        (session as any).user = token.user;
-        return session;
-      }
-      (session as any).user = undefined;
+      (session as any).user = isInCache ? token.user : undefined;
       return session;
     },
     jwt: async ({ token, user }) => {
@@ -52,5 +46,5 @@ export default NextAuth({
       return token;
     }
   },
-  secret: await OpenSslService.getInstance().getRand()
+  secret: OpenSslService.getInstance().getRand()
 });
