@@ -8,7 +8,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 80",
-    "serve": "cross-env NODE_ENV=production MONGODB_URI='localhost:27017/Garage' NEXTAUTH_URL='http://localhost' node server.js",
+    "serve": "NODE_ENV=production MONGODB_URI='localhost:27017/Garage' NEXTAUTH_URL='http://localhost' node server.js",
     "serve-dev": "cross-env NODE_ENV=development MONGODB_URI='localhost:27017/Garage' NEXTAUTH_URL='http://localhost' node server.js",
     "build": "next build",
     "start": "next start",

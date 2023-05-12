@@ -40,15 +40,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ steps.package.outputs.version }}
-          release_name: Release ${{ steps.package.outputs.version }}
+          tag_name: ${{ steps.package.outputs.version }}
+          release_name: ${{ steps.package.outputs.version }}
           body: Automated release created by GitHub Actions
           draft: false
           prerelease: false
       
       # Step 4: Compress files
       - name: Compress files
-        run: zip -r release.zip .next server.js package.json
+        run: zip -r release.zip .next server.js package.json node_modules public
 
       # Step 5: Upload build artifacts as release assets
       - name: Upload release assets
