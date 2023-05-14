@@ -3,7 +3,11 @@ const nextConfig = {
   reactStrictMode: false,
   swcMinify: true,
   output: 'standalone',
-  env: { MONGODB_URI: '127.0.0.1:27017/Garage', NEXTAUTH_URL: 'http://127.0.0.1:80' },
+  env: {
+    MONGODB_URI: '127.0.0.1:27017/Garage',
+    NEXTAUTH_URL: 'http://127.0.0.1',
+    NEXTAUTH_URL_INTERNAL: 'http://127.0.0.1'
+  },
   webpack: config => {
     // this will override the experiments
     config.experiments = { ...config.experiments, ...{ topLevelAwait: true } };
