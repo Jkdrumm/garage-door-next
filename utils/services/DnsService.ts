@@ -30,7 +30,7 @@ export class DnsService {
       packageAgent: pkg.name + '/' + pkg.version,
       maintainerEmail: pkg.author.email,
       subscriberEmail: pkg.author.email,
-      staging: process.env.NODE_ENV !== 'production',
+      staging: process.env.NODE_ENV === 'development',
       notify: (event: string, details: any) => {
         if ('error' === event) {
           // `details` is an error object in this case

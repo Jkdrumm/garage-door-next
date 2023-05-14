@@ -122,7 +122,7 @@ export class VersionService {
    * Restarts the application from the root.
    */
   public restart() {
-    if (process.env.NODE_ENV === 'production') global.completeUpdate();
+    if (process.env.NODE_ENV !== 'development') global.completeUpdate();
   }
 }
 

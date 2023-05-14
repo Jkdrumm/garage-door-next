@@ -6,14 +6,16 @@ const express = require('express');
 const { MongoClient } = require('mongodb');
 const openssl = require('openssl-nodejs');
 const { parse } = require('@godd/certificate-parser');
+const nextConfig = require('./next.config.js');
+console.log(nextConfig);
 
 const ports = {
   http: 80,
   https: 443
 };
 
-const dev = process.env.NODE_ENV !== 'production';
-const app = next({ dev });
+const dev = process.env.NODE_ENV === 'development';
+const app = next({ dev, conf: nextConfig });
 const handle = app.getRequestHandler();
 const server = express();
 let httpsServer;
@@ -48,7 +50,7 @@ function setCertificateRenewalTimeout(endDateString) {
 }
 
 async function getSecret() {
-  const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
+  const client = await MongoClient.connect(`mongodb://${nextConfig.env.MONGODB_URI}`);
   const db = client.db();
   const settings = await db.collection('settings').findOne();
   if (settings && settings.nextAuthSecret) {
@@ -110,7 +112,7 @@ global.startHttps = function () {
   if (enableHttps) startHttps();
 };
 
-const localDomains = process.env.NODE_ENV === 'production' ? ['localhost', '.local'] : ['localhost'];
+const localDomains = process.env.NODE_ENV === 'development' ? ['localhost'] : ['localhost', '.local'];
 
 // The NEXTAUTH_SECRET has to be loaded before the next.js server starts
 getSecret().then(() =>

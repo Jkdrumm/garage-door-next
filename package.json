@@ -8,12 +8,24 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 80",
-    "serve": "cross-env NODE_ENV=production MONGODB_URI='localhost:27017/Garage' NEXTAUTH_URL='http://localhost' node server.js",
-    "serve-dev": "cross-env NODE_ENV=development MONGODB_URI='localhost:27017/Garage' NEXTAUTH_URL='http://localhost' node server.js",
+    "serve": "node server.js",
+    "serve-dev": "cross-env NODE_ENV=development node server.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "pretty": "prettier --write \"./**/*.{ts,tsx,json}\""
+    "pretty": "prettier --write \"./**/*.{ts,tsx,json}\"",
+    "pkg": "pkg ."
+  },
+  "bin": "server.js",
+  "pkg": {
+    "assets": [
+      "next.config.js",
+      "public/**/*"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ],
+    "outputPath": "dist"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.0.19",
@@ -61,7 +73,7 @@
     "eslint": "^8.19.0",
     "eslint-config-next": "^12.2.2",
     "eslint-config-prettier": "^8.8.0",
+    "pkg": "^5.8.1",
     "typescript": "^5.0.4"
-  },
-  "bin": "server.js"
+  }
 }
