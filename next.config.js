@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
-  swcMinify: true,
   output: 'standalone',
   env: {},
+  experimental: { newNextLinkBehavior: false, appDir: false },
   webpack: config => {
     // this will override the experiments
     config.experiments = { ...config.experiments, ...{ topLevelAwait: true } };

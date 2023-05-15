@@ -7,6 +7,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Chakra } from '../components/util';
 import { SessionProvider } from 'next-auth/react';
 import { useDefaultLayout } from '../components/layouts';
+import { useState } from 'react';
 
 type NextPageWithLayout = NextPage & GetLayout;
 
@@ -26,9 +27,11 @@ const PageComponent = ({ Component, pageProps, router }: AppPropsWithLayout) => 
   );
 };
 
-const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } });
-
 export default function App({ Component, pageProps: { session, cookies, ...pageProps }, router }: AppPropsWithLayout) {
+  const [queryClient] = useState(
+    () => new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } })
+  );
+
   return (
     <>
       <Head>
