@@ -6,8 +6,9 @@ const express = require('express');
 const { MongoClient } = require('mongodb');
 const openssl = require('openssl-nodejs');
 const { parse } = require('@godd/certificate-parser');
+require('dotenv').config();
 const nextConfig = require('./next.config.js');
-console.log(nextConfig);
+console.log(process.env);
 
 const ports = {
   http: 80,
@@ -50,7 +51,7 @@ function setCertificateRenewalTimeout(endDateString) {
 }
 
 async function getSecret() {
-  const client = await MongoClient.connect(`mongodb://${nextConfig.env.MONGODB_URI}`);
+  const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
   const db = client.db();
   const settings = await db.collection('settings').findOne();
   if (settings && settings.nextAuthSecret) {
