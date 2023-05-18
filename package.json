@@ -28,7 +28,7 @@
       ".next/server/**/*.js"
     ],
     "targets": [
-      "node16-linux-arm64"
+      "node18-linux-arm64"
     ]
   },
   "dependencies": {
