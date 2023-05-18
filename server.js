@@ -16,7 +16,7 @@ const ports = {
 };
 
 const dev = process.env.NODE_ENV === 'development';
-const app = next({ dev, conf: nextConfig });
+const app = next({ dev, dir: __dirname, conf: nextConfig });
 const handle = app.getRequestHandler();
 const server = express();
 let httpsServer;

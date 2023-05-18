@@ -20,7 +20,12 @@
   "pkg": {
     "assets": [
       "next.config.js",
-      "public/**/*"
+      "public/**/*",
+      ".next/**/*",
+      "!.next/**/*.js"
+    ],
+    "scripts": [
+      ".next/**/*.js"
     ],
     "targets": [
       "node16-linux-arm64"
@@ -48,7 +53,6 @@
     "godaddy-dns": "^1.3.0",
     "greenlock": "^4.0.4",
     "greenlock-store-fs": "^3.2.2",
-    "lodash.merge": "^4.6.2",
     "mongodb": "^4.8.0",
     "next": "^13.4.2",
     "next-auth": "^4.10.0",
