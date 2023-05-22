@@ -7,8 +7,13 @@ const { MongoClient } = require('mongodb');
 const openssl = require('openssl-nodejs');
 const { parse } = require('@godd/certificate-parser');
 require('dotenv').config();
-const nextConfig = require('./next.config.js');
-console.log(process.env);
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: false,
+  env: {},
+  experimental: { newNextLinkBehavior: false, appDir: false }
+};
 
 const ports = {
   http: 80,

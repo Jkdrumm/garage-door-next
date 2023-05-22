@@ -19,7 +19,6 @@
   "bin": "server.js",
   "pkg": {
     "assets": [
-      "next.config.js",
       "public/**/*",
       ".next/**/*",
       "!.next/**/*.js"
