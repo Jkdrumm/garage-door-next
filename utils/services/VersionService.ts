@@ -101,7 +101,7 @@ export class VersionService {
     // Install dependencies so we don't have to bundle them in the release.
     execSync('npm install --omit=dev');
     // Prune dependencies to save space.
-    execSync('npm prune --production');
+    execSync('npm prune --omit=dev');
   }
 
   /**
