@@ -12,9 +12,8 @@ async function downloadUpdate(_req: NextApiRequest, res: NextApiResponse) {
   try {
     const versionService = VersionService.getInstance();
     await versionService.downloadNewVersion();
-    // Wait just a second before backing things up;
-    await new Promise(r => setTimeout(r, 1000));
-    await versionService.createBackup();
+    // TODO: Allow backups to actually do something. Until then, no point in making backups.
+    // await versionService.createBackup();
     await versionService.installUpdate();
     res.status(200).end();
     // Restart the application after sending the OK response
