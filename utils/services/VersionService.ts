@@ -74,6 +74,8 @@ export class VersionService {
    * Creates a backup of all files minus versions and backups
    */
   public async createBackup() {
+    // Wait just a second before backing things up;
+    await new Promise(r => setTimeout(r, 1000));
     if (!fs.existsSync('backups')) fs.mkdirSync('backups');
     const output = fs.createWriteStream('backups/backup.zip');
     const archive = archiver('zip', {
@@ -99,7 +101,7 @@ export class VersionService {
     // Install dependencies so we don't have to bundle them in the release.
     execSync('npm install --omit=dev');
     // Prune dependencies to save space.
-    execSync('npm prune');
+    execSync('npm prune --production');
   }
 
   /**
