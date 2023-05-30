@@ -1,13 +1,13 @@
 import type { GetLayout } from '../utils/types';
+import type { NextPage } from 'next/types';
+import type { AppProps } from 'next/app';
+import Head from 'next/head';
 import { Hydrate, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { NextPage } from 'next/types';
-import { AppProps } from 'next/app';
 import { Chakra } from '../components/util';
 import { SessionProvider } from 'next-auth/react';
 import { useDefaultLayout } from '../components/layouts';
 import { useState } from 'react';
-import Head from 'next/head';
 
 type NextPageWithLayout = NextPage & GetLayout;
 

@@ -15,7 +15,6 @@ import type {
 declare global {
   var httpsStarted: boolean;
   var certificateRefreshTime: number;
-  var startHttps: () => void;
   var dnsServiceInstance: DnsService;
   var garageDoorServiceInstance: GarageDoorService;
   var logServiceInstance: LogService;
@@ -24,5 +23,6 @@ declare global {
   var versionServiceInstance: VersionService;
   var webSocketManagerInstance: WebSocketService;
   var NEXTAUTH_SECRET: string;
-  var completeUpdate: () => void;
+  function startHttps(): void;
+  function completeUpdate(): void;
 }

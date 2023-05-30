@@ -8,12 +8,12 @@ on:
 jobs:
   create-release:
     runs-on: self-hosted
-    
+
     strategy:
       matrix:
         node-version: [16.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-    
+
     steps:
       # Step 1: Checkout the repository code
       - uses: actions/checkout@v3
@@ -27,7 +27,7 @@ jobs:
       # Step 2: Build the project
       - name: Build project
         run: npm run build
-      
+
       # Step 3: Get the version number
       - name: Get package info
         id: package
@@ -45,10 +45,10 @@ jobs:
           body: Automated release created by GitHub Actions
           draft: false
           prerelease: false
-      
+
       # Step 4: Compress files
       - name: Compress files
-        run: zip -r release.zip .next server.js package.json node_modules public
+        run: zip -r release.zip .next .env package.json package-lock.json public server.js
 
       # Step 5: Upload build artifacts as release assets
       - name: Upload release assets

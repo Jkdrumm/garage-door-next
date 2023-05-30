@@ -6,14 +6,22 @@ const express = require('express');
 const { MongoClient } = require('mongodb');
 const openssl = require('openssl-nodejs');
 const { parse } = require('@godd/certificate-parser');
+require('dotenv').config();
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: false,
+  env: {},
+  experimental: { newNextLinkBehavior: false, appDir: false }
+};
 
 const ports = {
   http: 80,
   https: 443
 };
 
-const dev = process.env.NODE_ENV !== 'production';
-const app = next({ dev });
+const dev = process.env.NODE_ENV === 'development';
+const app = next({ dev, dir: __dirname, conf: nextConfig });
 const handle = app.getRequestHandler();
 const server = express();
 let httpsServer;
@@ -110,7 +118,7 @@ global.startHttps = function () {
   if (enableHttps) startHttps();
 };
 
-const localDomains = process.env.NODE_ENV === 'production' ? ['localhost', '.local'] : ['localhost'];
+const localDomains = process.env.NODE_ENV === 'development' ? ['localhost'] : ['localhost', '.local'];
 
 // The NEXTAUTH_SECRET has to be loaded before the next.js server starts
 getSecret().then(() =>
