@@ -1,6 +1,6 @@
 {
   "name": "garage-door-next",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "author": {
     "name": "Joshua Drumm",
     "email": "Schythed@gmail.com"
@@ -53,7 +53,7 @@
     "greenlock-store-fs": "^3.2.2",
     "mongodb": "^4.8.0",
     "next": "^13.4.2",
-    "next-auth": "^4.22.1",
+    "next-auth": "^4.20.1",
     "node-gyp": "^9.3.1",
     "onoff": "^6.0.3",
     "openssl-nodejs": "^1.0.5",

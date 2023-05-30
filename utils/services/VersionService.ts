@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import decompress from 'decompress';
 import archiver from 'archiver';
+import { execSync } from 'child_process';
 import pack from '../../package.json';
 
 export class VersionService {
@@ -95,6 +96,10 @@ export class VersionService {
     const sourceFolder = `versions/${this.version}`;
     const destinationFolder = '';
     this.copyDirRecurisveSync(sourceFolder, destinationFolder);
+    // Install dependencies so we don't have to bundle them in the release.
+    execSync('npm install --omit=dev');
+    // Prune dependencies to save space.
+    execSync('npm prune');
   }
 
   /**
