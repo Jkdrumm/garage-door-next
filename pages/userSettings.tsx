@@ -196,7 +196,7 @@ function UserSettings() {
               </Tr>
             </Thead>
             <Tbody>
-              {users && true
+              {users
                 ? users.map(tableUser => (
                     <Tr key={tableUser.id}>
                       <Td>
@@ -287,8 +287,8 @@ function UserSettings() {
                   description:
                     'Does not allow viewing or moving of the garage door. New users are automatically placed here.'
                 }
-              ].map((button: AdminButtonDetails, index) => (
-                <Flex align="center" key={index}>
+              ].map((button: AdminButtonDetails) => (
+                <Flex align="center" key={button.label}>
                   {getAdminInfo(button)}
                   <Button
                     flex="1"
@@ -358,7 +358,7 @@ function UserSettings() {
 
 export const getServerSideProps = requireAdmin(async () => {
   const queryClient = new QueryClient();
-  await prefetchUsers(queryClient);
+  prefetchUsers(queryClient);
   return { props: { dehydratedState: dehydrate(queryClient) } };
 });
 

@@ -1,10 +1,8 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { MutableRefObject } from 'react';
 import { Socket } from 'socket.io-client';
-import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 
 export type WebSocketContextValue = {
-  webSocket?: Socket;
-  setWebSocket?: Dispatch<SetStateAction<Socket<DefaultEventsMap, DefaultEventsMap> | undefined>>;
+  webSocket: MutableRefObject<Socket | undefined>;
 };
 
-export const WebSocketContext = React.createContext<WebSocketContextValue>({});
+export const WebSocketContext = React.createContext<WebSocketContextValue>({} as WebSocketContextValue);

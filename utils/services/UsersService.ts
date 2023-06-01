@@ -12,7 +12,7 @@ export class UsersService {
 
   private constructor() {
     this.usersCache = {};
-    this.loadUsers();
+    this.loadUsers().catch(console.error);
   }
 
   /**
@@ -33,7 +33,7 @@ export class UsersService {
     db.collection('users')
       .find()
       .toArray((error, result) => {
-        client.close();
+        client.close().catch(console.error);
         if (error) throw error;
         else {
           const resultsPasswordRemoved = result?.map(user => ({

@@ -52,18 +52,17 @@ function Logs() {
       {logs ? (
         logs.map(({ id, ...logEntry }, index) => {
           const formattedDate = new Date(logEntry.date).toLocaleDateString();
+          const dateText = (() => {
+            if (formattedDate === todayFormatted) return 'Today';
+            if (formattedDate === yesterdayFormatted) return 'Yesterday';
+            return formattedDate;
+          })();
           return (
             <Fragment key={id}>
               {(index === 0 || new Date(logs[index - 1].date).toLocaleDateString() !== formattedDate) && (
                 <Flex m="16px 0px 2px 0px" direction="column" align="center">
                   <Box bg="red.400" mb="-16px" padding="4px" borderTopRadius="4px">
-                    <Text fontSize="14px">
-                      {formattedDate === todayFormatted
-                        ? 'Today'
-                        : formattedDate === yesterdayFormatted
-                        ? 'Yesterday'
-                        : formattedDate}
-                    </Text>
+                    <Text fontSize="14px">{dateText}</Text>
                   </Box>
                   <Divider m="16px 0px " bg="red.400" height="1px" borderRadius="full" opacity="1" />
                 </Flex>

@@ -16,16 +16,8 @@ export class GarageDoorService {
       const opener = new Gpio(2, 'in', 'both', sensorSettings);
       const closer = new Gpio(3, 'in', 'both', sensorSettings);
       // Listen for changes
-      opener.watch((error: any, value: 0 | 1) => {
-        if (error) console.error(error);
-        if (value === Gpio.LOW) this.changeState(GarageState.UNKNOWN);
-        else this.changeState(GarageState.OPEN);
-      });
-      closer.watch((error: any, value: 0 | 1) => {
-        if (error) console.error(error);
-        if (value === Gpio.LOW) this.changeState(GarageState.UNKNOWN);
-        else this.changeState(GarageState.CLOSED);
-      });
+      opener.watch(this.generateWatchFunction(GarageState.OPEN));
+      closer.watch(this.generateWatchFunction(GarageState.CLOSED));
       // Set the initial value
       const openValue = opener.readSync();
       const closeValue = closer.readSync();
@@ -33,6 +25,19 @@ export class GarageDoorService {
       else if (closeValue) this.changeState(GarageState.CLOSED);
       else this.changeState(GarageState.UNKNOWN);
     }
+  }
+
+  /**
+   * Listener for the garage door sensors.
+   * @param triggeredState The state to change to if the sensor is triggered.
+   * @returns A function to be called when the sensor is triggered or untriggered.
+   */
+  private generateWatchFunction(triggeredState: GarageState) {
+    return (error: any, value: 0 | 1) => {
+      if (error) console.error(error);
+      if (value === Gpio.LOW) this.changeState(GarageState.UNKNOWN);
+      else this.changeState(triggeredState);
+    };
   }
 
   /**
