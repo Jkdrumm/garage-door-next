@@ -43,7 +43,7 @@ export class LogService {
    */
   private getMessage(message?: any, ...optionalParams: any[]) {
     // eslint-disable-next-line no-control-regex
-    const regex = /[\u001b\u009b][[()#;?]*(?:\d{1,4}(?:;\d{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+    const regex = /\u009b[[()#;?]*(?:\d{1,4}(?:;\d{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
     return JSON.stringify({
       message: message?.toString ? message?.toString().replace(regex, '') : message,
       optionalParams: optionalParams.map(element => element?.toString().replace(regex, ''))
@@ -84,7 +84,7 @@ export class LogService {
     db.collection('logs')
       .find({ date: { $gte: endDate.toISOString(), $lt: startDate.toISOString() } })
       .toArray((error, result) => {
-        client.close();
+        client.close().catch(console.error);
         if (error) rejector(error);
         else if (!result) rejector('No result');
         else {
@@ -100,24 +100,27 @@ export class LogService {
    * @param event The type of event
    * @param settings Additional information to add to the log
    */
-  public async addEntry(
+  public addEntry(
     event: LogEvent,
     { oldValue, newValue, userId, username, firstName, lastName, data }: Omit<LogEntryResult, 'id' | 'event' | 'date'>
   ) {
-    const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
-    const db = client.db();
-    await db.collection('logs').insertOne({
-      event,
-      date: new Date().toISOString(),
-      oldValue,
-      newValue,
-      userId,
-      username,
-      firstName,
-      lastName,
-      data
-    });
-    client.close();
+    MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`)
+      .then(async client => {
+        const db = client.db();
+        await db.collection('logs').insertOne({
+          event,
+          date: new Date().toISOString(),
+          oldValue,
+          newValue,
+          userId,
+          username,
+          firstName,
+          lastName,
+          data
+        });
+        await client.close();
+      })
+      .catch(console.error);
   }
 }
 

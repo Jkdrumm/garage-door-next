@@ -17,14 +17,14 @@ function Home() {
   const [doorState, setDoorState] = useState<GarageState>(GarageState.FETCHING);
   const [adminLevel, setAdminLevel] = useState<AdminLevel>(AdminLevel.ACCOUNT);
   const [buttonLoading, setButtonLoading] = useState<boolean>(true);
-  const { webSocket, setWebSocket } = useContext(WebSocketContext);
+  const { webSocket } = useContext(WebSocketContext);
 
   const queryClient = useQueryClient();
   const router = useRouter();
 
   const stopWebSocket = useCallback(() => {
-    webSocket?.removeAllListeners();
-    webSocket?.disconnect();
+    webSocket?.current?.removeAllListeners();
+    webSocket?.current?.disconnect();
   }, [webSocket]);
 
   useEffect(() => {
@@ -32,21 +32,22 @@ function Home() {
   }, [stopWebSocket]);
 
   useQuery(['socket'], () => axios.post('/api/socket'), {
+    enabled: webSocket.current === undefined,
     refetchOnWindowFocus: false,
     retry: false,
-    onSuccess: () => socketInitializer()
+    onSuccess: () => {
+      socketInitializer();
+    }
   });
 
-  const timeoutWebsocket = async () => {
+  const timeoutWebsocket = useCallback(async () => {
     stopWebSocket();
     await signOut({ redirect: false });
-    router.push('/');
-  };
+    await router.push('/');
+  }, [router, stopWebSocket]);
 
-  const socketInitializer = async () => {
-    await axios.post('/api/socket');
+  const socketInitializer = useCallback(() => {
     const socket = io();
-
     socket.on('message', (payload: Message[]) => {
       payload.forEach(item => {
         const { event, message } = item;
@@ -68,10 +69,10 @@ function Home() {
           case GarageEvent.ADMIN:
             setAdminLevel(message);
             queryClient.setQueryData(['adminLevel'], message);
-            queryClient.invalidateQueries(['notifications']);
+            queryClient.invalidateQueries(['notifications']).catch(console.error);
             break;
           case GarageEvent.SESSION_TIMEOUT:
-            timeoutWebsocket();
+            timeoutWebsocket().catch(console.error);
             break;
           default:
             console.warn(`Unknown data: ${event}: ${message}`);
@@ -86,32 +87,40 @@ function Home() {
       setTimeout(socketInitializer, 10000);
     });
 
-    setWebSocket?.(socket);
-  };
+    webSocket.current = socket;
+  }, [queryClient, timeoutWebsocket, webSocket]);
 
-  const pressButton = () => {
+  useEffect(() => {
+    socketInitializer();
+  }, [socketInitializer]);
+
+  function pressButton() {
     setButtonLoading(true);
-    webSocket?.emit('message', GarageAction.PRESS);
-  };
+    webSocket?.current?.emit('message', GarageAction.PRESS);
+  }
 
-  const getPermissionsText = (canView: boolean) => {
+  function getPermissionsText(canView: boolean) {
     if (canView)
       return "You do not have permission to move the garage door, you may only see it's state. If this an error, please contact your system administrator.";
     return "You do not have permission to view the garage door's status. If this an error, please contact your system administrator.";
-  };
+  }
 
-  const getGarageText = (doorState: GarageState) =>
-    ['Garage Door: Open', 'Garage Door: Closed', 'Garage Door: Unknown', 'Connecting to server...'][doorState];
-  const getGarageBoxColor = (doorState: GarageState) => ['green.300', 'red.300', 'purple.300', 'orange.300'][doorState];
+  function getGarageText(doorState: GarageState) {
+    return ['Garage Door: Open', 'Garage Door: Closed', 'Garage Door: Unknown', 'Connecting to server...'][doorState];
+  }
+  function getGarageBoxColor(doorState: GarageState) {
+    return ['green.300', 'red.300', 'purple.300', 'orange.300'][doorState];
+  }
 
   const iconStyles = { size: '48px' };
-  const getGarageBoxIcon = (doorState: GarageState) =>
-    [
+  function getGarageBoxIcon(doorState: GarageState) {
+    return [
       <FiUnlock {...iconStyles} key={1} />,
       <FiLock {...iconStyles} key={2} />,
       <FiAlertCircle {...iconStyles} key={3} />,
       <FiLoader {...iconStyles} key={4} />
     ][doorState];
+  }
 
   const canMove = buttonLoading || adminLevel >= AdminLevel.USER;
   const canView = buttonLoading || adminLevel >= AdminLevel.VIEWER;

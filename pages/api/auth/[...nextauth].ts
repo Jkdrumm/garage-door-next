@@ -14,20 +14,21 @@ export default NextAuth({
         password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials) {
-        const { username, password } = credentials as any;
+        const password = credentials?.password ?? '';
+        const username = credentials?.username ?? '';
         const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
         const users = client.db().collection('users');
         const result = await users.findOne({ username: { $regex: new RegExp(username, 'i') } });
         if (!result) {
-          client.close();
+          await client.close();
           throw new Error(USERNAME_OR_PASSWORD_ERROR_MESSAGE);
         }
         const checkPassword = await compare(password, result.password);
         if (!checkPassword) {
-          client.close();
+          await client.close();
           throw new Error(USERNAME_OR_PASSWORD_ERROR_MESSAGE);
         }
-        client.close();
+        await client.close();
         return {
           id: result._id.toString()
         };

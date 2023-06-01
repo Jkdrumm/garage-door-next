@@ -59,7 +59,7 @@ async function getSecret() {
   const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
   const db = client.db();
   const settings = await db.collection('settings').findOne();
-  if (settings && settings.nextAuthSecret) {
+  if (settings?.nextAuthSecret) {
     global.NEXTAUTH_SECRET = settings.nextAuthSecret;
     client.close();
   } else {
@@ -121,36 +121,38 @@ global.startHttps = function () {
 const localDomains = process.env.NODE_ENV === 'development' ? ['localhost'] : ['localhost', '.local'];
 
 // The NEXTAUTH_SECRET has to be loaded before the next.js server starts
-getSecret().then(() =>
-  app
-    .prepare()
-    .then(() => {
-      server.all('*', (req, res) => {
-        const {
-          headers: { host },
-          url
-        } = req;
-        /**
-         * Redirect to HTTPS if meeting all 4 conditions
-         * 1. Attempting to access over HTTP
-         * 2. HTTPS server is configured
-         * 3. Not accesing over local domain names
-         * 4. Not accessing using an IP address
-         */
-        if (
-          !req.secure &&
-          enableHttps &&
-          !localDomains.some(domain => host?.toLowerCase().endsWith(domain)) &&
-          !/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/.test(host)
-        )
-          res.redirect('https://' + host + url);
-        else handle(req, res);
-      });
-      startHttp();
-      if (enableHttps) startHttps();
-    })
-    .catch(error => console.error(error))
-);
+getSecret()
+  .then(() =>
+    app
+      .prepare()
+      .then(() => {
+        server.all('*', (req, res) => {
+          const {
+            headers: { host },
+            url
+          } = req;
+          /**
+           * Redirect to HTTPS if meeting all 4 conditions
+           * 1. Attempting to access over HTTP
+           * 2. HTTPS server is configured
+           * 3. Not accesing over local domain names
+           * 4. Not accessing using an IP address
+           */
+          if (
+            !req.secure &&
+            enableHttps &&
+            !localDomains.some(domain => host?.toLowerCase().endsWith(domain)) &&
+            !/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/.test(host)
+          )
+            res.redirect('https://' + host + url);
+          else handle(req, res);
+        });
+        startHttp();
+        if (enableHttps) startHttps();
+      })
+      .catch(console.error)
+  )
+  .catch(console.error);
 
 global.completeUpdate = function completeUpdate() {
   process.exit();

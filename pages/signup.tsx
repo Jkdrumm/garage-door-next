@@ -34,8 +34,8 @@ function SignUp() {
     })) as any;
     if (!ok) {
       // If account was created but there was an error logging in for some reason, just return to the login page.
-      router.push('/');
-    } else router.push('/home');
+      await router.push('/');
+    } else await router.push('/home');
   };
   const createAccountError = (error: any) => {
     setSignUpError(error.response.data.message);

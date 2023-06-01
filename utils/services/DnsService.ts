@@ -38,7 +38,7 @@ export class DnsService {
         }
       }
     });
-    this.loadDNS();
+    this.loadDNS().catch(console.error);
   }
 
   /**
@@ -54,7 +54,7 @@ export class DnsService {
       this.secret = settings.dnsApiSecret ?? null;
       if (this.key && this.hostname && this.secret) {
         // All credentials are saved. Attempt to login to GoDaddy
-        this.login();
+        await this.login();
       }
     }
   };
@@ -90,12 +90,16 @@ export class DnsService {
         domain: hostname,
         records: [{ type: 'A', name: '@', ttl: 3600 }]
       });
-      LogService.getInstance().addEntry(LogEvent.DNS_UPDATE, { data: JSON.stringify({ ip: currentIp, hostname }) });
+      LogService.getInstance().addEntry(LogEvent.DNS_UPDATE, {
+        data: JSON.stringify({ ip: currentIp, hostname })
+      });
       this.isLoggedIn = true;
       this.setCertificateTimer();
     }
     if (this.refreshTimer) clearTimeout(this.refreshTimer);
-    this.refreshTimer = setTimeout(this.login, 3600000);
+    this.refreshTimer = setTimeout(() => {
+      this.login().catch(console.error);
+    }, 3600000);
   }
 
   private setCertificateTimer() {
@@ -107,7 +111,10 @@ export class DnsService {
         global.certificateRefreshTime -= MAX_TIMER_LENGTH;
         this.setCertificateTimer();
       }, MAX_TIMER_LENGTH);
-    } else setTimeout(() => this.getNewCertificates(), global.certificateRefreshTime);
+    } else
+      setTimeout(() => {
+        this.getNewCertificates().catch(console.error);
+      }, global.certificateRefreshTime);
   }
 
   /**
@@ -175,11 +182,11 @@ export class DnsService {
   private deleteOldCertificates() {
     const certsDirectory = '.config/greenlock/live/';
     const certs = fs.readdirSync(certsDirectory);
-    certs.forEach(async cert => {
+    certs.forEach(cert => {
       // Delete everything but the configured hostname
       if (cert === this.hostname) return;
       // TODO: Investigate removeing. This may not remove from './greenlock.d/config.json'
-      await this.greenlock.remove({ subject: cert });
+      this.greenlock.remove({ subject: cert }).catch(console.error);
       const folderPath = path.join(certsDirectory, cert);
       const folderContents = fs.readdirSync(folderPath);
       folderContents.forEach(file => fs.unlinkSync(path.join(folderPath, file)));
@@ -215,7 +222,7 @@ export class DnsService {
       });
 
       const { pems } = await this.greenlock.get({ servername: this.hostname });
-      if (pems && pems.privkey && pems.cert && pems.chain) {
+      if (pems?.privkey && pems.cert && pems.chain) {
         global.startHttps();
         LogService.getInstance().addEntry(LogEvent.CERTIFICATES, {});
         this.setCertificateTimer();

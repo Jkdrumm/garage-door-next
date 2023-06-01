@@ -299,10 +299,11 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
               <MenuDivider />
               <MenuItem
                 icon={<FiLogOut size="1.25em" />}
-                onClick={async () => {
-                  webSocket?.disconnect();
-                  await signOut({ redirect: false });
-                  router.push('/');
+                onClick={() => {
+                  webSocket.current?.disconnect();
+                  signOut({ redirect: false })
+                    .then(() => router.push('/'))
+                    .catch(console.error);
                 }}>
                 Sign out
               </MenuItem>

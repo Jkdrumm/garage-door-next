@@ -49,7 +49,6 @@ function Settings() {
   const isMobile = useIsMobile();
   const toast = useToast();
   const [dnsSignInError, setDnsSignInError] = useState<string>('');
-  const [loadingCertificates, setLoadingCertificates] = useState<boolean>(false);
   const { data: dnsInfo } = useDnsInfo();
   const queryClient = useQueryClient();
   const { data: versionInfo, isLoading: versionInfoIsLoading } = useGetVersion();
@@ -149,7 +148,6 @@ function Settings() {
   );
 
   function configureCertificatesSuccess() {
-    setLoadingCertificates(false);
     queryClient.setQueryData(['dnsInfo'], (queryData: any) => ({ ...queryData, isRunningHttps: true }));
     toast({
       title: 'Certificates Configured',
@@ -160,7 +158,6 @@ function Settings() {
   }
 
   function configureCertificatesError() {
-    setLoadingCertificates(false);
     toast({
       title: 'Error updating certificates',
       status: 'error',
@@ -169,10 +166,13 @@ function Settings() {
     });
   }
 
-  const { mutate: configureCertificates } = useMutation(() => axios.post('/api/getCertificates'), {
-    onSuccess: configureCertificatesSuccess,
-    onError: configureCertificatesError
-  });
+  const { mutate: configureCertificates, isLoading: isLoadingCertificates } = useMutation(
+    () => axios.post('/api/getCertificates'),
+    {
+      onSuccess: configureCertificatesSuccess,
+      onError: configureCertificatesError
+    }
+  );
 
   function closeDnsDrawer() {
     onCloseDNS();
@@ -271,10 +271,9 @@ function Settings() {
               <Button
                 colorScheme="cyan"
                 onClick={() => {
-                  setLoadingCertificates(true);
                   configureCertificates();
                 }}
-                isLoading={loadingCertificates}
+                isLoading={isLoadingCertificates}
                 isDisabled={dnsInfo === undefined || !dnsInfo.isLoggedIn}>
                 Configure
               </Button>

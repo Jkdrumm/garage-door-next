@@ -18,14 +18,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Send error response if duplicate user is found
   if (checkExistingUser) {
     res.status(422).json({ message: 'Username taken' });
-    client.close();
+    await client.close();
     return;
   }
   // Default permissions are set to the bare minimum upon account creation.
   let adminLevel = AdminLevel.ACCOUNT;
   // Check if device setup has been completed.
   const settings = await db.collection('settings').findOne();
-  if (!settings || !settings.setupComplete) {
+  if (!settings?.setupComplete) {
     // If setup has not completed, make the first user the admin.
     adminLevel = AdminLevel.ADMIN;
     // Save setup completed.
@@ -40,7 +40,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   });
   UsersService.getInstance().addUser({ id: status.insertedId.toString(), firstName, lastName, username, adminLevel });
   res.status(201).json({ message: 'User created', ...status });
-  client.close();
+  await client.close();
 }
 
 export default requirePost(handler);
