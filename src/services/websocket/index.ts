@@ -37,5 +37,5 @@ const listeners = [
 ];
 
 export async function addEventListeners(socket: Socket, id: string) {
-  for (const listener of listeners) await listener(socket, id);
+  listeners.forEach(listener => listener(socket, id));
 }

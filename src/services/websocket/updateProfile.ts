@@ -5,7 +5,7 @@ import { UsersService } from 'services';
 import { hash } from 'bcryptjs';
 import { UserLevel } from 'enums';
 
-export async function updateProfile(socket: Socket, id: string) {
+export function updateProfile(socket: Socket, id: string) {
   addEventListener(
     socket,
     id,
