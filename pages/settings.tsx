@@ -131,7 +131,7 @@ function Settings() {
               <Text mr="1">Last checked:</Text>
               <Skeleton isLoaded={!versionInfoIsLoading}>
                 {versionInfo?.timeOfLastCheck
-                  ? versionInfo?.timeOfLastCheck?.toLocaleString()
+                  ? new Date(versionInfo.timeOfLastCheck).toLocaleString()
                   : '0/0/0000, 00:00:00 AM'}
               </Skeleton>
               <Button

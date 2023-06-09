@@ -3,7 +3,7 @@ import { addEventListener } from './utils';
 import { VersionService } from 'services';
 import pkg from '../../../package.json';
 
-export async function installUpdate(socket: Socket, id: string) {
+export function installUpdate(socket: Socket, id: string) {
   addEventListener(socket, id, 'INSTALL_UPDATE', async () => {
     const versionService = VersionService.getInstance();
     const newestVersion = (await versionService.getVersion()) ?? pkg.version;

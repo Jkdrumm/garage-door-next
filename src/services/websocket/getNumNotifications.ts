@@ -3,7 +3,7 @@ import { addEventListener } from './utils';
 import { UsersService } from 'services';
 import { UserLevel } from 'enums';
 
-export async function getNumNotifications(socket: Socket, id: string) {
+export function getNumNotifications(socket: Socket, id: string) {
   addEventListener(
     socket,
     id,

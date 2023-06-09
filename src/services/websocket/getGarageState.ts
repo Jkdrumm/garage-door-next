@@ -3,7 +3,7 @@ import { addEventListener } from './utils';
 import { GarageDoorService } from 'services';
 import { UserLevel } from 'enums';
 
-export async function getGarageState(socket: Socket, id: string) {
+export function getGarageState(socket: Socket, id: string) {
   addEventListener(socket, id, 'GET_GARAGE_STATE', () => GarageDoorService.getInstance().getDoorState(), {
     userLevel: UserLevel.VIEWER
   });

@@ -12,7 +12,7 @@ export class VersionService {
   private version: string | undefined;
   private downloadUrl: string | undefined;
   private assetName: string | undefined;
-  private lastCheckedForUpdate: Date | undefined;
+  private lastCheckedForUpdate: string | undefined;
   private isCurrentlyUpdating = false;
 
   private constructor() {}
@@ -54,7 +54,7 @@ export class VersionService {
     // If we haven't checked for an update since booting, do so.
     if (!this.lastCheckedForUpdate) return true;
     // Get the time between last checking for an update and now.
-    const timeSinceLastCheck = new Date().getTime() - this.lastCheckedForUpdate?.getTime();
+    const timeSinceLastCheck = new Date().getTime() - new Date(this.lastCheckedForUpdate).getTime();
     // If it's been more than a day, check for an update.
     if (timeSinceLastCheck > 86400000) return true;
     return false;
@@ -69,7 +69,7 @@ export class VersionService {
       'https://api.github.com/repos/Jkdrumm/garage-door-next/releases/latest'
     );
     this.version = data.name;
-    this.lastCheckedForUpdate = new Date();
+    this.lastCheckedForUpdate = new Date().toISOString();
     // No asset for some reason, default back to saying we have the newest version.
     if (data.assets.length === 0) return pack.version;
     const asset = data.assets[0];

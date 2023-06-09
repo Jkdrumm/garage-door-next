@@ -2,6 +2,6 @@ import { Socket } from 'socket.io';
 import { addEventListener } from './utils';
 import { DnsService } from 'services';
 
-export async function configureCertificates(socket: Socket, id: string) {
+export function configureCertificates(socket: Socket, id: string) {
   addEventListener(socket, id, 'CONFIGURE_CERTIFICATES', () => DnsService.getInstance().getNewCertificates());
 }
