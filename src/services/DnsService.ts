@@ -192,7 +192,7 @@ export class DnsService {
     certs.forEach(cert => {
       // Delete everything but the configured hostname
       if (cert === this.hostname) return;
-      // TODO: Investigate removeing. This may not remove from './greenlock.d/config.json'
+      // TODO: Investigate removing. This may not remove from './greenlock.d/config.json'
       this.greenlock.remove({ subject: cert }).catch(console.error);
       const folderPath = path.join(certsDirectory, cert);
       const folderContents = fs.readdirSync(folderPath);

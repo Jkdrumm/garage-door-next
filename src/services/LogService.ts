@@ -60,7 +60,7 @@ export class LogService {
    */
   private getMessage(message?: any, ...optionalParams: any[]) {
     // eslint-disable-next-line no-control-regex
-    const regex = /[\u001b\u009b][[()#;?]*(?:\d{1,4}(?:;\d{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+    const regex = /\u009b[[()#;?]*(?:\d{1,4}(?:;\d{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
     return JSON.stringify({
       message: message?.toString ? message?.toString().replace(regex, '') : message,
       optionalParams: optionalParams.map(element => element?.toString().replace(regex, ''))

@@ -9,7 +9,7 @@ type AddEventListenerOptions = {
 };
 
 // eslint-disable-next-line no-unused-vars
-type DataFn = (payload: any) => Promise<any> | any;
+type DataFn = (payload: any) => any;
 
 const defaultAddEventListenerOptions: AddEventListenerOptions = {
   failureDataFn: sendUnauthorized,

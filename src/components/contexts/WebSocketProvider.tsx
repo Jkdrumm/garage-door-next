@@ -13,7 +13,6 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
   const { status } = useSession();
   const router = useRouter();
-  // const currentSearchDate = useRef<string>();
   // eslint-disable-next-line no-unused-vars
   const onConnectEvents = useRef<((...args: any[]) => void)[]>([]);
 

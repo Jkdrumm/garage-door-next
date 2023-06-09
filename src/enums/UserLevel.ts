@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * The permission levels for users.
  */

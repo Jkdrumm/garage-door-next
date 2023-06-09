@@ -54,22 +54,7 @@ function Settings() {
 
   const { mutate: checkForNewVersion, isLoading: isCheckingForNewVersion } = useCheckForNewVersion();
 
-  const { mutate: downloadUpdate } = useInstallUpdate({
-    // onSuccess: () =>
-    //   toast({
-    //     title: 'Download Succeeded',
-    //     status: 'success',
-    //     position: 'bottom-left',
-    //     isClosable: true
-    //   }),
-    // onError: () =>
-    //   toast({
-    //     title: 'Download Failed',
-    //     status: 'error',
-    //     position: 'bottom-left',
-    //     isClosable: true
-    //   })
-  });
+  const { mutate: downloadUpdate } = useInstallUpdate();
 
   const { mutate: configureDNS } = useConfigureDns({
     onSuccess: () => {

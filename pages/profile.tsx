@@ -73,13 +73,13 @@ function Profile() {
           password: ''
         }}
         onSubmit={(variables, { setFieldValue }) => {
-          const updateParams: any = {};
+          const updateParams: Partial<typeof variables> = {};
           if (variables.firstName && variables.firstName !== user?.firstName)
             updateParams.firstName = variables.firstName;
           if (variables.lastName && variables.lastName !== user?.lastName) updateParams.lastName = variables.lastName;
           if (variables.password) updateParams.password = variables.password;
           resetPassword.current = () => setFieldValue('password', '');
-          updateProfile(updateParams as typeof variables);
+          updateProfile(updateParams);
         }}>
         {props => (
           <Flex direction="column" width="100%" align="center">

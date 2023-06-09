@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * The kinds of websocket events.
  */
