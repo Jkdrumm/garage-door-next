@@ -6,7 +6,9 @@ import { VERSION_QUERY_KEY, VersionData } from 'hooks/queries';
 export const CHECK_FOR_NEW_VERSION_QUERY_KEY = ['checkForNewVersion'];
 const API_ROUTE = 'CHECK_FOR_NEW_VERSION';
 
-async function FETCH_FUNC(sendMessage: WebSocketContextValue['sendMessage']): Promise<VersionData> {
+type CheckForNewVersionData = Omit<VersionData, 'isCurrentlyUpdating'>;
+
+async function FETCH_FUNC(sendMessage: WebSocketContextValue['sendMessage']): Promise<CheckForNewVersionData> {
   return new Promise(resolve =>
     sendMessage(API_ROUTE, undefined, ({ data: { version, timeOfLastCheck } }) => {
       resolve({
@@ -24,10 +26,10 @@ async function FETCH_FUNC(sendMessage: WebSocketContextValue['sendMessage']): Pr
  */
 export const useCheckForNewVersion = (
   options?: UseMutationOptions
-): Omit<UseMutationResult<VersionData, unknown, void, unknown>, 'mutationKey' | 'mutationFn'> => {
+): Omit<UseMutationResult<CheckForNewVersionData, unknown, void, unknown>, 'mutationKey' | 'mutationFn'> => {
   const { sendMessage } = useContext(WebSocketContext);
   const queryClient = useQueryClient();
-  return useMutation<VersionData, unknown, void, unknown>(
+  return useMutation<CheckForNewVersionData, unknown, void, unknown>(
     [CHECK_FOR_NEW_VERSION_QUERY_KEY],
     () => FETCH_FUNC(sendMessage),
     {
