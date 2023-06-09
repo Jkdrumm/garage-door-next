@@ -9,10 +9,14 @@ import { VersionService } from 'services';
  */
 export async function prefetchVersion(queryClient: QueryClient) {
   const versionService = VersionService.getInstance();
-  const versionInfo = {
-    version: await versionService.getVersion(),
-    timeOfLastCheck: versionService.getLastCheckedForUpdate()?.toLocaleString(),
-    isCurrentlyUpdating: versionService.getIsCurrentlyUpdating()
-  };
+  const version = versionService.getVersionForPrefetch();
+  let versionInfo = undefined;
+  // Only set the version if we have one cached, otherwise the page takes too long to load.
+  if (version)
+    versionInfo = {
+      version,
+      timeOfLastCheck: versionService.getLastCheckedForUpdate()?.toLocaleString(),
+      isCurrentlyUpdating: versionService.getIsCurrentlyUpdating()
+    };
   queryClient.setQueryData(VERSION_QUERY_KEY, versionInfo);
 }

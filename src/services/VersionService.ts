@@ -38,6 +38,15 @@ export class VersionService {
   }
 
   /**
+   * Gets the version for prefetching. This will not check for an update.
+   * @returns The cached version number (e.g. 1.5.2) or undefined if we should check for an update.
+   */
+  public getVersionForPrefetch() {
+    if (this.shouldCheckForUpdate()) return undefined;
+    return this.version;
+  }
+
+  /**
    * Determines if we should check for an update.
    * @returns Whether or not we should check for an update.
    */
