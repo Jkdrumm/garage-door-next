@@ -1,4 +1,4 @@
-import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import { useState } from 'react';
 import {
   Button,
   Flex,
@@ -10,15 +10,15 @@ import {
   InputRightElement,
   Text
 } from '@chakra-ui/react';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import axios from 'axios';
 import { Formik, Form, Field } from 'formik';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { CenterBox, Link } from '../components';
-import { requireLoggedOut } from '../utils/auth';
-import { validateUsername, validatePassword, validateName } from '../utils/validations';
+import { CenterBox, Link } from 'components';
+import { requireLoggedOut } from 'auth';
+import { validateUsername, validatePassword, validateName } from 'validations';
 
 function SignUp() {
   const router = useRouter();

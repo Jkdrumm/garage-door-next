@@ -13,6 +13,10 @@ const nextConfig = {
   reactStrictMode: false,
   env: {},
   experimental: { newNextLinkBehavior: false, appDir: false }
+  // webpack: config => {
+  //   config.resolve.fallback = { fs: false, child_process: false, greenlock: false };
+  //   return config;
+  // }
 };
 
 const ports = {

@@ -1,13 +1,12 @@
-import type { GetLayout } from '../utils/types';
+import type { GetLayout } from 'types';
 import type { NextPage } from 'next/types';
 import type { AppProps } from 'next/app';
-import Head from 'next/head';
 import { useState } from 'react';
+import Head from 'next/head';
+import { SessionProvider } from 'next-auth/react';
 import { Hydrate, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { Chakra } from '../components/util';
-import { SessionProvider } from 'next-auth/react';
-import { useDefaultLayout } from '../components/layouts';
+import { Chakra, UpdateOverlay, useDefaultLayout, WebSocketProvider } from 'components';
 
 type NextPageWithLayout = NextPage & GetLayout;
 
@@ -41,7 +40,10 @@ export default function App({ Component, pageProps: { session, cookies, ...pageP
         <QueryClientProvider client={queryClient}>
           <Hydrate state={pageProps?.dehydratedState}>
             <Chakra cookies={cookies}>
-              <PageComponent Component={Component} pageProps={pageProps} router={router} />
+              <WebSocketProvider>
+                <UpdateOverlay />
+                <PageComponent Component={Component} pageProps={pageProps} router={router} />
+              </WebSocketProvider>
             </Chakra>
           </Hydrate>
         </QueryClientProvider>
