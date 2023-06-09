@@ -2,7 +2,7 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import decompress from 'decompress';
-import archiver from 'archiver';
+// import archiver from 'archiver';
 import { execSync } from 'child_process';
 import pack from '../../package.json';
 import { WebSocketService } from './WebSocketService';
@@ -110,23 +110,23 @@ export class VersionService {
   /**
    * Creates a backup of all files minus versions and backups
    */
-  private async createBackup() {
-    // Wait just a second before backing things up;
-    await new Promise(r => setTimeout(r, 1000));
-    if (!fs.existsSync('backups')) fs.mkdirSync('backups');
-    const output = fs.createWriteStream('backups/backup.zip');
-    const archive = archiver('zip', {
-      zlib: { level: 9 } // Set the compression level
-    });
-    archive.on('error', console.error);
-    archive.on('warning', console.warn);
-    archive.pipe(output);
-    archive.glob('.', {
-      ignore: ['versions/**', 'backups/**', 'node_modules/**', 'greenlock.d/**', 'mongo_key_temp.*', 'mongoserver.asc'],
-      pattern: []
-    });
-    await archive.finalize();
-  }
+  // private async createBackup() {
+  //   // Wait just a second before backing things up;
+  //   await new Promise(r => setTimeout(r, 1000));
+  //   if (!fs.existsSync('backups')) fs.mkdirSync('backups');
+  //   const output = fs.createWriteStream('backups/backup.zip');
+  //   const archive = archiver('zip', {
+  //     zlib: { level: 9 } // Set the compression level
+  //   });
+  //   archive.on('error', console.error);
+  //   archive.on('warning', console.warn);
+  //   archive.pipe(output);
+  //   archive.glob('.', {
+  //     ignore: ['versions/**', 'backups/**', 'node_modules/**', 'greenlock.d/**', 'mongo_key_temp.*', 'mongoserver.asc'],
+  //     pattern: []
+  //   });
+  //   await archive.finalize();
+  // }
 
   /**
    * Copies data from the recently downloaded version folder.
