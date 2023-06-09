@@ -1,4 +1,4 @@
-import { CheckCircleIcon, SmallCloseIcon } from '@chakra-ui/icons';
+import { useState } from 'react';
 import {
   Button,
   Circle,
@@ -19,10 +19,6 @@ import {
   FormLabel,
   Heading,
   Input,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
   Skeleton,
   Stack,
   Text,
@@ -30,19 +26,23 @@ import {
   useDisclosure,
   useToast
 } from '@chakra-ui/react';
-import axios from 'axios';
+import { CheckCircleIcon, SmallCloseIcon } from '@chakra-ui/icons';
 import { Field, Form, Formik } from 'formik';
-import { useEffect, useState } from 'react';
-import { QueryClient, dehydrate, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from '../components';
-import { useMainLayout } from '../components/layouts';
-import { requireAdmin } from '../utils/auth';
-import { useDnsInfo, useGetVersion, useIsMobile } from '../utils/hooks';
-import { prefetchDnsInfo } from '../utils/hooks/prefetch';
-import { DnsService } from '../utils/services';
-import { validateDomain, validateApiSecret, validateApiKey } from '../utils/validations';
-import { useRouter } from 'next/router';
+import { QueryClient, dehydrate } from '@tanstack/react-query';
+import { Link, useMainLayout } from 'components';
+import { requireAdmin } from 'auth';
+import {
+  useDnsInfo,
+  useVersion,
+  useIsMobile,
+  useCheckForNewVersion,
+  useConfigureDns,
+  useConfigureCertificates
+} from 'hooks';
+import { prefetchDnsInfo, prefetchVersion } from 'hooks/prefetch';
+import { validateDomain, validateApiSecret, validateApiKey } from 'validations';
 import pack from '../package.json';
+import { useInstallUpdate } from 'hooks/mutations/useInstallUpdate';
 
 function Settings() {
   const { isOpen: isOpenDNS, onOpen: onOpenDNS, onClose: onCloseDNS } = useDisclosure();
@@ -50,129 +50,41 @@ function Settings() {
   const toast = useToast();
   const [dnsSignInError, setDnsSignInError] = useState<string>('');
   const { data: dnsInfo } = useDnsInfo();
-  const queryClient = useQueryClient();
-  const { data: versionInfo, isLoading: versionInfoIsLoading } = useGetVersion();
-  const [timer, setTimer] = useState<number>(10);
-  const [timerStarted, setTimerStarted] = useState(false);
-  const router = useRouter();
+  const { data: versionInfo, isLoading: versionInfoIsLoading } = useVersion();
 
-  useEffect(() => {
-    if (!timerStarted) return;
+  const { mutate: checkForNewVersion, isLoading: isCheckingForNewVersion } = useCheckForNewVersion();
 
-    const intervalTimer = setInterval(() => {
-      if (timer > 0) setTimer(time => time - 1);
-      else {
-        clearInterval(intervalTimer);
-        router.reload();
-      }
-    }, 1000);
+  const { mutate: downloadUpdate } = useInstallUpdate();
 
-    return () => clearInterval(intervalTimer);
-  }, [timer, timerStarted, router]);
-
-  const { mutate: downloadUpdate, isLoading: isUpdateLoading } = useMutation(() => axios.post('/api/downloadUpdate'), {
+  const { mutate: configureDNS } = useConfigureDns({
     onSuccess: () => {
       toast({
-        title: 'Download Succeeded',
+        title: 'DNS Configuration Updated',
         status: 'success',
         position: 'bottom-left',
         isClosable: true
       });
-      setTimerStarted(true);
+      closeDnsDrawer();
     },
+    onError: ({ error }) => setDnsSignInError(error)
+  });
+
+  const { mutate: configureCertificates, isLoading: isLoadingCertificates } = useConfigureCertificates({
+    onSuccess: () =>
+      toast({
+        title: 'Certificates Configured',
+        status: 'success',
+        position: 'bottom-left',
+        isClosable: true
+      }),
     onError: () =>
       toast({
-        title: 'Download Failed',
+        title: 'Error updating certificates',
         status: 'error',
         position: 'bottom-left',
         isClosable: true
       })
   });
-
-  function configureDnsSuccess(
-    _data: any,
-    {
-      doneSubmitting
-    }: {
-      key: string;
-      secret: string;
-      hostname: string;
-      resetApiInputs: () => void;
-      doneSubmitting: () => void;
-    }
-  ) {
-    queryClient.setQueryData(['dnsInfo'], (queryData: any) => ({ ...queryData, isLoggedIn: true }));
-    doneSubmitting();
-    toast({
-      title: 'DNS Configuration Updated',
-      status: 'success',
-      position: 'bottom-left',
-      isClosable: true
-    });
-    closeDnsDrawer();
-  }
-
-  function configureDnsError(
-    data: any,
-    {
-      doneSubmitting
-    }: {
-      key: string;
-      secret: string;
-      hostname: string;
-      resetApiInputs: () => void;
-      doneSubmitting: () => void;
-    }
-  ) {
-    setDnsSignInError(data.response.data);
-    doneSubmitting();
-  }
-
-  const { mutate: configureDNS } = useMutation(
-    (params: {
-      key: string;
-      secret: string;
-      hostname: string;
-      resetApiInputs: () => void;
-      doneSubmitting: () => void;
-    }) =>
-      axios.post('/api/configureDNS', {
-        key: params.key,
-        secret: params.secret,
-        hostname: params.hostname
-      }),
-    {
-      onSuccess: configureDnsSuccess,
-      onError: configureDnsError
-    }
-  );
-
-  function configureCertificatesSuccess() {
-    queryClient.setQueryData(['dnsInfo'], (queryData: any) => ({ ...queryData, isRunningHttps: true }));
-    toast({
-      title: 'Certificates Configured',
-      status: 'success',
-      position: 'bottom-left',
-      isClosable: true
-    });
-  }
-
-  function configureCertificatesError() {
-    toast({
-      title: 'Error updating certificates',
-      status: 'error',
-      position: 'bottom-left',
-      isClosable: true
-    });
-  }
-
-  const { mutate: configureCertificates, isLoading: isLoadingCertificates } = useMutation(
-    () => axios.post('/api/getCertificates'),
-    {
-      onSuccess: configureCertificatesSuccess,
-      onError: configureCertificatesError
-    }
-  );
 
   function closeDnsDrawer() {
     onCloseDNS();
@@ -183,16 +95,11 @@ function Settings() {
 
   return (
     <>
-      <Modal isOpen={timerStarted} onClose={() => {}}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader textAlign="center">Restarting in {timer}</ModalHeader>
-        </ModalContent>
-      </Modal>
       <Container maxW="4xl">
         <Heading mb="32px" mt={{ base: '24px', md: '40px' }}>
           Settings
         </Heading>
+
         <Flex
           borderRadius="20px"
           bg={useColorModeValue('white', 'gray.700')}
@@ -203,18 +110,39 @@ function Settings() {
           direction="column"
           padding="16px 0px"
           mb="16px">
-          <Text>Current Version: {pack.version}</Text>
-          <Flex>
-            <Text mr="1">Newest Version:</Text>
-            <Skeleton isLoaded={!versionInfoIsLoading}>{versionInfo ?? '0.0.0'}</Skeleton>
-          </Flex>
-          <Button
-            colorScheme="cyan"
-            onClick={() => downloadUpdate()}
-            isLoading={isUpdateLoading}
-            isDisabled={versionInfoIsLoading || versionInfo === undefined || versionInfo <= pack.version}>
-            Download Update
-          </Button>
+          <Stack direction={{ base: 'column', md: 'row' }} textAlign="center" width="100%">
+            <Flex width="100%" flexDir="column" alignItems="center">
+              <Text>Current Version: {pack.version}</Text>
+              <Flex>
+                <Text mr="1">Newest Version:</Text>
+                <Skeleton isLoaded={!versionInfoIsLoading}>{versionInfo?.version ?? pack.version}</Skeleton>
+              </Flex>
+              <Button
+                colorScheme="cyan"
+                onClick={() => downloadUpdate()}
+                isLoading={versionInfo?.isCurrentlyUpdating}
+                isDisabled={
+                  versionInfoIsLoading || versionInfo?.version === undefined || versionInfo?.version <= pack.version
+                }>
+                Download Update
+              </Button>
+            </Flex>
+            <Flex justify="space-between" width="100%" flexDir="column" height="inherit" alignItems="center">
+              <Text mr="1">Last checked:</Text>
+              <Skeleton isLoaded={!versionInfoIsLoading}>
+                {versionInfo?.timeOfLastCheck
+                  ? versionInfo?.timeOfLastCheck?.toLocaleString()
+                  : '0/0/0000, 00:00:00 AM'}
+              </Skeleton>
+              <Button
+                colorScheme="cyan"
+                onClick={() => checkForNewVersion()}
+                isLoading={isCheckingForNewVersion}
+                isDisabled={versionInfo?.isCurrentlyUpdating}>
+                Check for New Version
+              </Button>
+            </Flex>
+          </Stack>
         </Flex>
         <Stack direction={{ base: 'column', md: 'row' }} gap="16px">
           <Flex
@@ -289,16 +217,11 @@ function Settings() {
 
           <Formik
             initialValues={{ key: '', dnsPassword: '', hostname: dnsInfo?.hostname }}
-            onSubmit={(params, { setFieldValue, setSubmitting }) => {
+            onSubmit={params => {
               const updateParams: any = { ...params };
-              updateParams.resetApiInputs = () => {
-                setFieldValue('key', '');
-                setFieldValue('secret', '');
-              };
-              updateParams.doneSubmitting = () => setSubmitting(false);
               configureDNS(updateParams);
             }}
-            isInitialValid={false}>
+            validateOnMount={false}>
             {props => (
               <Form>
                 <DrawerBody>
@@ -367,13 +290,8 @@ function Settings() {
 
 export const getServerSideProps = requireAdmin(async () => {
   const queryClient = new QueryClient();
-  const dnsService = DnsService.getInstance();
-  const dnsInfo = {
-    hostname: dnsService.getHostname(),
-    isLoggedIn: dnsService.getIsLoggedIn(),
-    isRunningHttps: dnsService.getIsRunningHttps()
-  };
-  prefetchDnsInfo(queryClient, dnsInfo);
+  prefetchDnsInfo(queryClient);
+  await prefetchVersion(queryClient);
   return { props: { dehydratedState: dehydrate(queryClient) } };
 });
 

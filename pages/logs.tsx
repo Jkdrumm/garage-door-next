@@ -1,3 +1,4 @@
+import { Fragment, useState } from 'react';
 import {
   Box,
   Container,
@@ -10,15 +11,15 @@ import {
   RadioGroup,
   Skeleton,
   Stack,
-  Text
+  Text,
+  VStack
 } from '@chakra-ui/react';
-import { Fragment, useState } from 'react';
-import { LogCard } from '../components';
-import { useMainLayout } from '../components/layouts';
-import { requireAdmin } from '../utils/auth';
-import { useLogs } from '../utils/hooks';
+import { AnimatePresence, motion } from 'framer-motion';
 import { SingleDatepicker } from 'chakra-dayzed-datepicker';
-import { LogLength } from '../utils/types/LogEntry';
+import { LogCard, useMainLayout } from 'components';
+import { requireAdmin } from 'auth';
+import { LogLength } from 'types';
+import { useLogs } from 'hooks';
 
 function Logs() {
   const todayFormatted = new Date().toLocaleDateString();
@@ -50,30 +51,50 @@ function Logs() {
         </RadioGroup>
       </FormControl>
       {logs ? (
-        logs.map(({ id, ...logEntry }, index) => {
-          const formattedDate = new Date(logEntry.date).toLocaleDateString();
-          const dateText = (() => {
-            if (formattedDate === todayFormatted) return 'Today';
-            if (formattedDate === yesterdayFormatted) return 'Yesterday';
-            return formattedDate;
-          })();
-          return (
-            <Fragment key={id}>
-              {(index === 0 || new Date(logs[index - 1].date).toLocaleDateString() !== formattedDate) && (
-                <Flex m="16px 0px 2px 0px" direction="column" align="center">
-                  <Box bg="red.400" mb="-16px" padding="4px" borderTopRadius="4px">
-                    <Text fontSize="14px">{dateText}</Text>
-                  </Box>
-                  <Divider m="16px 0px " bg="red.400" height="1px" borderRadius="full" opacity="1" />
-                </Flex>
-              )}
-              <LogCard {...logEntry} />
-            </Fragment>
-          );
-        })
+        <Flex flexDir="column" alignItems="center">
+          <AnimatePresence initial={false}>
+            {logs.map(({ id, ...logEntry }, index) => {
+              const formattedDate = new Date(logEntry.date).toLocaleDateString();
+              const dateText = (() => {
+                if (formattedDate === todayFormatted) return 'Today';
+                if (formattedDate === yesterdayFormatted) return 'Yesterday';
+                return formattedDate;
+              })();
+              return (
+                <Fragment key={id}>
+                  {(index === 0 || new Date(logs[index - 1].date).toLocaleDateString() !== formattedDate) && (
+                    <Flex mt="16px" direction="column" align="center" width="100%">
+                      <Box bg="red.400" mb="-16px" padding="4px" borderTopRadius="4px">
+                        <Text fontSize="14px">{dateText}</Text>
+                      </Box>
+                      <Divider m="16px 0px " bg="red.400" height="1px" borderRadius="full" opacity="1" />
+                    </Flex>
+                  )}
+                  <motion.div
+                    key={id}
+                    initial={{
+                      height: '0px',
+                      width: '80%',
+                      opacity: 0
+                    }}
+                    animate={{
+                      height: 'auto',
+                      width: '100%',
+                      opacity: 1,
+                      transition: {
+                        duration: 0.25
+                      }
+                    }}>
+                    <LogCard {...logEntry} />
+                  </motion.div>
+                </Fragment>
+              );
+            })}
+          </AnimatePresence>
+        </Flex>
       ) : (
         <Stack>
-          <Flex m="16px 0px -8px 0px" direction="column" align="center">
+          <Flex m="16px 0px -6px 0px" direction="column" align="center">
             <Box bg="red.400" mb="-16px" padding="4px" borderTopRadius="4px">
               <Skeleton>
                 <Text fontSize="14px">Today</Text>
@@ -81,9 +102,11 @@ function Logs() {
             </Box>
             <Divider m="16px 0px " bg="red.400" height="1px" borderRadius="full" opacity="1" />
           </Flex>
-          {[...Array(16).keys()].map(index => (
-            <Skeleton key={index} height="40px" mb="8px" borderRadius="8px" />
-          ))}
+          <VStack gap="2px">
+            {[...Array(16).keys()].map(index => (
+              <Skeleton key={index} height="40px" borderRadius="8px" width="100%" />
+            ))}
+          </VStack>
         </Stack>
       )}
     </Container>

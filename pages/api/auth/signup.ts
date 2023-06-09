@@ -1,10 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next/types';
 import { MongoClient } from 'mongodb';
 import { hash } from 'bcryptjs';
-import { validateName, validatePassword, validateUsername } from '../../../utils/validations';
-import { AdminLevel } from '../../../utils/enums';
-import { UsersService } from '../../../utils/services';
-import { requirePost } from '../../../utils/auth';
+import { validateName, validatePassword, validateUsername } from 'validations';
+import { UserLevel } from 'enums';
+import { UsersService } from 'services';
+import { requirePost } from 'auth';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { firstName, lastName, username, password } = req.body;
@@ -22,12 +22,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     return;
   }
   // Default permissions are set to the bare minimum upon account creation.
-  let adminLevel = AdminLevel.ACCOUNT;
+  let adminLevel = UserLevel.ACCOUNT;
   // Check if device setup has been completed.
   const settings = await db.collection('settings').findOne();
   if (!settings?.setupComplete) {
     // If setup has not completed, make the first user the admin.
-    adminLevel = AdminLevel.ADMIN;
+    adminLevel = UserLevel.ADMIN;
     // Save setup completed.
     await db.collection('settings').updateOne({}, { $set: { setupComplete: true } }, { upsert: true });
   }
@@ -38,7 +38,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     password: await hash(password, 12),
     adminLevel
   });
-  UsersService.getInstance().addUser({ id: status.insertedId.toString(), firstName, lastName, username, adminLevel });
+  UsersService.getInstance().addUser({
+    id: status.insertedId.toString(),
+    firstName,
+    lastName,
+    username,
+    userLevel: adminLevel
+  });
   res.status(201).json({ message: 'User created', ...status });
   await client.close();
 }

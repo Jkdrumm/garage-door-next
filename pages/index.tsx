@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Button,
   Flex,
@@ -9,14 +10,13 @@ import {
   InputRightElement,
   Text
 } from '@chakra-ui/react';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { Formik, Form, Field } from 'formik';
 import { signIn } from 'next-auth/react';
-import { validateUsername, validatePassword } from '../utils/validations';
-import { CenterBox, Link } from '../components';
-import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { requireLoggedOut } from '../utils/auth';
-import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import { validateUsername, validatePassword } from 'validations';
+import { CenterBox, Link } from 'components';
+import { requireLoggedOut } from 'auth';
 
 function Index() {
   const router = useRouter();
@@ -38,7 +38,7 @@ function Index() {
           if (!ok) {
             setLoginError(error);
             setLoginLoading(false);
-          } else router.push('/home');
+          } else await router.push('/home');
         }}>
         {({ handleSubmit }) => (
           <Form>

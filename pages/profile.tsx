@@ -1,4 +1,4 @@
-import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import { useRef, useState } from 'react';
 import {
   Button,
   Flex,
@@ -11,63 +11,42 @@ import {
   Switch,
   useToast
 } from '@chakra-ui/react';
-import axios from 'axios';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { Formik, Form, Field } from 'formik';
-import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { CenterBox } from '../components';
-import { useMainLayout } from '../components/layouts';
-import { requireLoggedIn } from '../utils/auth';
-import { useUser } from '../utils/hooks';
-import { validateName, validatePassword } from '../utils/validations';
+import { CenterBox, useMainLayout } from 'components';
+import { requireLoggedIn } from 'auth';
+import { useUpdateProfile, useUser } from 'hooks';
+import { validateName, validatePassword } from 'validations';
 
 function Profile() {
   const { data: user } = useUser();
   const [editMode, setEditMode] = useState<boolean>(false);
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const resetPassword = useRef<() => void>(() => {});
 
-  const queryClient = useQueryClient();
   const toast = useToast();
 
-  const updateProfileError = () => {
-    toast({
-      title: 'Error updating profile',
-      status: 'error',
-      position: 'bottom-left',
-      isClosable: true
-    });
-  };
-
-  const updateProfileSuccess = (
-    _data: any,
-    { firstName, lastName, resetPassword }: { firstName: string; lastName: string; resetPassword: () => void }
-  ) => {
-    resetPassword();
-    queryClient.setQueryData(['user'], (queryData: any) => {
-      const updatedUser = queryData;
-      if (firstName) updatedUser.firstName = firstName;
-      if (lastName) updatedUser.lastName = lastName;
-      return updatedUser;
-    });
-    toast({
-      title: 'Profile updated',
-      status: 'success',
-      position: 'bottom-left',
-      isClosable: true
-    });
-    setEditMode(false);
-    setShowPassword(false);
-  };
-
-  const { mutate: updateProfile } = useMutation(
-    (user: { firstName: string; lastName: string; password: string; resetPassword: () => void }) =>
-      axios.post('/api/updateProfile', { firstName: user.firstName, lastName: user.lastName, password: user.password }),
-    {
-      onSuccess: updateProfileSuccess,
-      onError: updateProfileError
-    }
-  );
+  const { mutate: updateProfile, isLoading } = useUpdateProfile({
+    onSuccess: () => {
+      resetPassword.current();
+      toast({
+        title: 'Profile updated',
+        status: 'success',
+        position: 'bottom-left',
+        isClosable: true
+      });
+      setEditMode(false);
+      setShowPassword(false);
+    },
+    onError: () =>
+      toast({
+        title: 'Error updating profile',
+        status: 'error',
+        position: 'bottom-left',
+        isClosable: true
+      })
+  });
 
   const getChangedFields = (values: { [field: string]: string }) => {
     const changedValues = [];
@@ -93,12 +72,13 @@ function Profile() {
           lastName: `${user?.lastName}`,
           password: ''
         }}
-        onSubmit={({ firstName, lastName, password }, { setFieldValue }) => {
-          const updateParams: any = {};
-          if (firstName && firstName !== user?.firstName) updateParams.firstName = firstName;
-          if (lastName && lastName !== user?.lastName) updateParams.lastName = lastName;
-          if (password) updateParams.password = password;
-          updateParams.resetPassword = () => setFieldValue('password', '');
+        onSubmit={(variables, { setFieldValue }) => {
+          const updateParams: Partial<typeof variables> = {};
+          if (variables.firstName && variables.firstName !== user?.firstName)
+            updateParams.firstName = variables.firstName;
+          if (variables.lastName && variables.lastName !== user?.lastName) updateParams.lastName = variables.lastName;
+          if (variables.password) updateParams.password = variables.password;
+          resetPassword.current = () => setFieldValue('password', '');
           updateProfile(updateParams);
         }}>
         {props => (
@@ -188,6 +168,7 @@ function Profile() {
                     width="100%"
                     height="64px"
                     isDisabled={!props.isValid || !hasChangedFields(props.values)}
+                    isLoading={isLoading}
                     type="submit">
                     {`Save ${getChangedFields(props.values)}`}
                   </Button>
