@@ -27,9 +27,7 @@ const PageComponent = ({ Component, pageProps, router }: AppPropsWithLayout) => 
 };
 
 export default function App({ Component, pageProps: { session, cookies, ...pageProps }, router }: AppPropsWithLayout) {
-  const [queryClient] = useState(
-    () => new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } })
-  );
+  const [queryClient] = useState(() => new QueryClient());
 
   return (
     <>

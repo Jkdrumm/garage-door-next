@@ -28,7 +28,6 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
   }, [sendMessage]);
 
   const { mutate: connectWebsocket } = useMutation(['socket'], () => axios.post('/api/socket'), {
-    retry: false,
     onSuccess: () => {
       socketInitializer();
     }

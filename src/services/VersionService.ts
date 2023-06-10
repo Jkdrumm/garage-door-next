@@ -196,6 +196,8 @@ export class VersionService {
       // await this.createBackup();
       await this.installUpdate();
       webSocketService.emitMessage('UPDATE_COMPLETE', UserLevel.ACCOUNT);
+      // Wait one second before restarting to allow the message to be sent.
+      await new Promise(r => setTimeout(r, 1000));
       this.restart();
     } catch (error) {
       this.isCurrentlyUpdating = false;
