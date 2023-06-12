@@ -7,15 +7,7 @@ export const VERSION_QUERY_KEY = ['version'];
 const API_ROUTE = 'GET_VERSION';
 
 async function FETCH_FUNC(sendMessage: WebSocketContextValue['sendMessage']): Promise<VersionData> {
-  return new Promise(resolve =>
-    sendMessage(API_ROUTE, undefined, ({ data: { version, timeOfLastCheck, isCurrentlyUpdating } }) => {
-      resolve({
-        version,
-        timeOfLastCheck: new Date(timeOfLastCheck).toLocaleString(),
-        isCurrentlyUpdating
-      });
-    })
-  );
+  return new Promise(resolve => sendMessage(API_ROUTE, undefined, ({ data }) => resolve(data)));
 }
 
 /**

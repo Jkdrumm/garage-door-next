@@ -22,5 +22,5 @@ export async function prefetchVersion(queryClient: QueryClient) {
       return;
     }
   }
-  queryClient.invalidateQueries(VERSION_QUERY_KEY);
+  await queryClient.invalidateQueries(VERSION_QUERY_KEY);
 }
