@@ -7,7 +7,7 @@ export function checkForNewVersion(socket: Socket, id: string) {
     const versionService = VersionService.getInstance();
     return {
       version: await versionService.hardCheckNewVersion(),
-      timeOfLastCheck: versionService.getLastCheckedForUpdate()
+      timeOfLastCheck: versionService.getLastCheckedForUpdate(),
     };
   });
 }

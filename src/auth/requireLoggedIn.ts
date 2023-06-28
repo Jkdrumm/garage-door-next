@@ -21,17 +21,17 @@ export function requireLoggedIn(getServerSideProps?: GetServerSideProps): GetSer
       const serverSideResult = {
         props: {
           dehydratedState: dehydrate(queryClient),
-          cookies: context.req.headers.cookie ?? ''
-        }
+          cookies: context.req.headers.cookie ?? '',
+        },
       };
       if (getServerSideProps) {
         const nestedServerSideResult = (await getServerSideProps(context)) as any;
         serverSideResult.props.dehydratedState.queries = nestedServerSideResult.props.dehydratedState.queries.concat(
-          serverSideResult.props.dehydratedState.queries
+          serverSideResult.props.dehydratedState.queries,
         );
         serverSideResult.props.dehydratedState.mutations =
           nestedServerSideResult.props.dehydratedState.mutations.concat(
-            serverSideResult.props.dehydratedState.mutations
+            serverSideResult.props.dehydratedState.mutations,
           );
       }
       return serverSideResult;
@@ -39,8 +39,8 @@ export function requireLoggedIn(getServerSideProps?: GetServerSideProps): GetSer
       return {
         redirect: {
           destination: '/',
-          permanent: false
-        }
+          permanent: false,
+        },
       };
     }
   };

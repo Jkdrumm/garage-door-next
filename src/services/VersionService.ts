@@ -66,7 +66,7 @@ export class VersionService {
    */
   public async hardCheckNewVersion() {
     const { data } = await axios.get<VersionInfo>(
-      'https://api.github.com/repos/Jkdrumm/garage-door-next/releases/latest'
+      'https://api.github.com/repos/Jkdrumm/garage-door-next/releases/latest',
     );
     this.version = data.name;
     this.lastCheckedForUpdate = new Date().toISOString();
@@ -81,6 +81,10 @@ export class VersionService {
       versionParts[2] = (parseInt(versionParts[2]) + 1).toString();
       this.version = versionParts.join('.');
     }
+    WebSocketService.getInstance().emitMessage('VERSION_CHECK', {
+      version: this.version,
+      timeOfLastCheck: this.lastCheckedForUpdate,
+    });
     return this.version;
   }
 
@@ -190,19 +194,20 @@ export class VersionService {
     if (this.isCurrentlyUpdating) throw new Error('Already updating');
     this.isCurrentlyUpdating = true;
     const webSocketService = WebSocketService.getInstance();
+    webSocketService.emitMessage('VERSION_UPDATE');
     try {
       await this.downloadNewVersion();
       // TODO: Allow backups to actually do something. Until then, no point in making backups.
       // await this.createBackup();
       await this.installUpdate();
-      webSocketService.emitMessage('UPDATE_COMPLETE', UserLevel.ACCOUNT);
+      webSocketService.emitMessageToUserLevel(UserLevel.ACCOUNT, 'UPDATE_COMPLETE');
       // Wait one second before restarting to allow the message to be sent.
       await new Promise(r => setTimeout(r, 1000));
       this.restart();
     } catch (error) {
       this.isCurrentlyUpdating = false;
       console.error(error);
-      webSocketService.emitMessage('UPDATE_FAILED', UserLevel.ADMIN);
+      webSocketService.emitMessage('UPDATE_FAILED');
     }
   }
 

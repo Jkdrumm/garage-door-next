@@ -6,5 +6,5 @@ export enum UserLevel {
   ACCOUNT,
   VIEWER,
   USER,
-  ADMIN
+  ADMIN,
 }

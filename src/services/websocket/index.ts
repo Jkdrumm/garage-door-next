@@ -1,5 +1,3 @@
-import { Socket } from 'socket.io';
-
 import { checkForNewVersion } from './checkForNewVersion';
 import { configureCertificates } from './configureCertificates';
 import { deleteUser } from './deleteUser';
@@ -16,6 +14,7 @@ import { installUpdate } from './installUpdate';
 import { updateProfile } from './updateProfile';
 import { updateUser } from './updateUser';
 import { configureDNS } from './configureDNS';
+import { ServerSocket } from 'types';
 
 const listeners = [
   checkForNewVersion,
@@ -33,9 +32,9 @@ const listeners = [
   installUpdate,
   press,
   updateProfile,
-  updateUser
+  updateUser,
 ];
 
-export async function addEventListeners(socket: Socket, id: string) {
+export async function addEventListeners(socket: ServerSocket, id: string) {
   listeners.forEach(listener => listener(socket, id));
 }

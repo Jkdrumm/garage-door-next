@@ -12,7 +12,7 @@ import {
   Skeleton,
   Stack,
   Text,
-  VStack
+  VStack,
 } from '@chakra-ui/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { SingleDatepicker } from 'chakra-dayzed-datepicker';
@@ -20,6 +20,8 @@ import { LogCard, useMainLayout } from 'components';
 import { requireAdmin } from 'auth';
 import { LogLength } from 'types';
 import { useLogs } from 'hooks';
+import { QueryClient, dehydrate } from '@tanstack/react-query';
+import { prefetchLogs } from 'hooks/prefetch';
 
 function Logs() {
   const todayFormatted = new Date().toLocaleDateString();
@@ -75,15 +77,15 @@ function Logs() {
                     initial={{
                       height: '0px',
                       width: '80%',
-                      opacity: 0
+                      opacity: 0,
                     }}
                     animate={{
                       height: 'auto',
                       width: '100%',
                       opacity: 1,
                       transition: {
-                        duration: 0.25
-                      }
+                        duration: 0.25,
+                      },
                     }}>
                     <LogCard {...logEntry} />
                   </motion.div>
@@ -115,6 +117,10 @@ function Logs() {
 
 export default Logs;
 
-export const getServerSideProps = requireAdmin();
+export const getServerSideProps = requireAdmin(async () => {
+  const queryClient = new QueryClient();
+  await prefetchLogs(queryClient);
+  return { props: { dehydratedState: dehydrate(queryClient) } };
+});
 
 Logs.getLayout = useMainLayout;

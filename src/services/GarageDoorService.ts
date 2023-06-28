@@ -1,7 +1,6 @@
 import { Gpio } from 'onoff';
-import { GarageState, UserLevel } from 'enums';
-import { LogService, UsersService, WebSocketService } from '.';
-import { LogEvent } from 'types';
+import { GarageState, LogEvent, UserLevel } from 'enums';
+import { LogService, UsersService, WebSocketService } from 'services';
 
 export class GarageDoorService {
   private doorState: GarageState | undefined;
@@ -88,7 +87,7 @@ export class GarageDoorService {
    */
   private changeState(state: GarageState) {
     if (state !== this.doorState) {
-      WebSocketService.getInstance().emitMessage('GARAGE_STATE', UserLevel.VIEWER, state);
+      WebSocketService.getInstance().emitMessageToUserLevel(UserLevel.VIEWER, 'GARAGE_STATE', state);
       LogService.getInstance().addEntry(LogEvent.STATE_CHANGE, { oldValue: this.doorState, newValue: state });
       this.doorState = state;
     }

@@ -1,13 +1,13 @@
 import { QueryClient } from '@tanstack/react-query';
 import { LOGS_QUERY_KEY } from 'hooks';
-import { LogEntry } from 'types';
-import { Socket } from 'socket.io-client';
+import { ClientSocket, LogEntry } from 'types';
 
-export function addLiveLogListener(socket: Socket, queryClient: QueryClient) {
-  socket.on('LIVE_LOG', (log: LogEntry) => {
+export function addLiveLogListener(socket: ClientSocket, queryClient: QueryClient) {
+  socket.on('LIVE_LOG', log => {
     ['day', 'week', 'month'].forEach(length => {
-      queryClient.setQueryData<LogEntry[]>([LOGS_QUERY_KEY, new Date().toLocaleDateString(), length], prevData =>
-        prevData ? [log, ...prevData] : undefined
+      queryClient.setQueryData<LogEntry[]>(
+        [LOGS_QUERY_KEY, { date: new Date().toLocaleDateString(), length }],
+        prevData => (prevData ? [log, ...prevData] : undefined),
       );
     });
   });

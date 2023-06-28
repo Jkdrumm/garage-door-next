@@ -9,7 +9,7 @@ import {
   InputGroup,
   InputRightElement,
   Switch,
-  useToast
+  useToast,
 } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { Formik, Form, Field } from 'formik';
@@ -34,7 +34,7 @@ function Profile() {
         title: 'Profile updated',
         status: 'success',
         position: 'bottom-left',
-        isClosable: true
+        isClosable: true,
       });
       setEditMode(false);
       setShowPassword(false);
@@ -44,8 +44,8 @@ function Profile() {
         title: 'Error updating profile',
         status: 'error',
         position: 'bottom-left',
-        isClosable: true
-      })
+        isClosable: true,
+      }),
   });
 
   const getChangedFields = (values: { [field: string]: string }) => {
@@ -70,7 +70,7 @@ function Profile() {
           username: `${user?.username}`,
           firstName: `${user?.firstName}`,
           lastName: `${user?.lastName}`,
-          password: ''
+          password: '',
         }}
         onSubmit={(variables, { setFieldValue }) => {
           const updateParams: Partial<typeof variables> = {};
@@ -154,7 +154,7 @@ function Profile() {
                           username: `${user?.username}`,
                           firstName: `${user?.firstName}`,
                           lastName: `${user?.lastName}`,
-                          password: ''
+                          password: '',
                         });
                       }
                     }}

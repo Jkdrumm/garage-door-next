@@ -4,11 +4,11 @@ export const theme = extendTheme({
   styles: {
     global: {
       body: {
-        overflowX: 'hidden'
+        overflowX: 'hidden',
       },
       button: {
-        WebkitTapHighlightColor: 'transparent'
-      }
-    }
-  }
+        WebkitTapHighlightColor: 'transparent',
+      },
+    },
+  },
 });

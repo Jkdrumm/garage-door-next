@@ -5,6 +5,6 @@ import { UserLevel } from 'enums';
 
 export function getUserLevel(socket: Socket, id: string) {
   addEventListener(socket, id, 'GET_USER_LEVEL', () => UsersService.getInstance().getUserLevel(id), {
-    userLevel: UserLevel.ACCOUNT
+    userLevel: UserLevel.ACCOUNT,
   });
 }

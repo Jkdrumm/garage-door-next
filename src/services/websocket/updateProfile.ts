@@ -30,6 +30,6 @@ export function updateProfile(socket: Socket, id: string) {
         if (hasFirstName || hasLastName) UsersService.getInstance().updateFields(user.id, updateParameters);
       } else throw new Error('Failed to update profile.');
     },
-    { userLevel: UserLevel.ACCOUNT }
+    { userLevel: UserLevel.ACCOUNT },
   );
 }

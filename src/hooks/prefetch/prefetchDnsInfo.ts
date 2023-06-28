@@ -1,5 +1,5 @@
 import { QueryClient } from '@tanstack/react-query';
-import { DNS_INFO_QUERY_KEY } from 'hooks/queries';
+import { DNS_INFO_QUERY_KEY, DnsInfo } from 'hooks/queries';
 import { DnsService } from 'services';
 
 /**
@@ -9,10 +9,12 @@ import { DnsService } from 'services';
  */
 export function prefetchDnsInfo(queryClient: QueryClient) {
   const dnsService = DnsService.getInstance();
-  const dnsInfo = {
+  const dnsInfo: DnsInfo = {
     hostname: dnsService.getHostname(),
     isLoggedIn: dnsService.getIsLoggedIn(),
-    isRunningHttps: dnsService.getIsRunningHttps()
+    isLoggingIn: dnsService.getIsLoggingIn(),
+    isRunningHttps: dnsService.getIsRunningHttps(),
+    isGettingCertificates: dnsService.getIsGettingCertificates(),
   };
-  queryClient.setQueryData(DNS_INFO_QUERY_KEY, dnsInfo);
+  queryClient.setQueryData([DNS_INFO_QUERY_KEY], dnsInfo);
 }

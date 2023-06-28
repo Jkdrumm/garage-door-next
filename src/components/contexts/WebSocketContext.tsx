@@ -1,16 +1,11 @@
+/* eslint-disable no-unused-vars */
 import { createContext } from 'react';
-import { GarageRequestType } from 'enums';
+import { ClientSocket } from 'types';
 
 export type WebSocketContextValue = {
   isWebsocketConnected: boolean;
-  sendMessage: <T = any>(
-    // eslint-disable-next-line no-unused-vars
-    message: GarageRequestType,
-    // eslint-disable-next-line no-unused-vars
-    payload?: any,
-    // eslint-disable-next-line no-unused-vars
-    ack?: (({ data, error }: { data: T; error?: string }) => void) | undefined
-  ) => void;
+  sendMessage: ClientSocket['emit'];
+  sendMessagePromise: ClientSocket['emitWithAck'];
   disconnectWebsocket: () => Promise<void>;
   pressButton: () => void;
 };

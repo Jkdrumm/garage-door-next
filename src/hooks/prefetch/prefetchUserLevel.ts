@@ -8,5 +8,5 @@ import { USER_LEVEL_QUERY_KEY } from 'hooks/queries';
  * @param userLevel The {@link UserLevel}
  */
 export function prefetchUserLevel(queryClient: QueryClient, userLevel: UserLevel) {
-  queryClient.setQueryData(USER_LEVEL_QUERY_KEY, userLevel);
+  queryClient.setQueryData([USER_LEVEL_QUERY_KEY], userLevel);
 }

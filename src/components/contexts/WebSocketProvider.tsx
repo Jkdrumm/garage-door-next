@@ -1,27 +1,34 @@
 import { ReactNode, useCallback, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
-import { Socket, io } from 'socket.io-client';
+import { io } from 'socket.io-client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { WebSocketContext } from './WebSocketContext';
-import { GarageRequestType } from 'enums';
 import { addEventListeners } from './websocket';
+import { ClientSocket } from 'types';
+
+type EmitParams = Parameters<ClientSocket['emit' | 'emitWithAck']>;
 
 export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
-  const webSocket = useRef<Socket>();
+  const webSocket = useRef<ClientSocket>();
   const queryClient = useQueryClient();
   const { status } = useSession();
   const router = useRouter();
   // eslint-disable-next-line no-unused-vars
-  const onConnectEvents = useRef<((...args: any[]) => void)[]>([]);
+  const onConnectEvents = useRef<{ event: EmitParams; resolve?: (value: any) => void }[]>([]);
 
-  // eslint-disable-next-line no-unused-vars
-  const sendMessage = useCallback((message: GarageRequestType, payload?: any, ack?: (...args: any[]) => void) => {
-    const sendMessage = () => webSocket?.current?.emit(message, payload, ack);
-    if (webSocket.current?.connected) sendMessage();
-    else onConnectEvents.current.push(sendMessage);
-  }, []);
+  const sendMessage = useCallback((...event: Parameters<ClientSocket['emit']>) => {
+    if (webSocket.current?.connected) webSocket.current.emit.apply(webSocket.current, event);
+    else onConnectEvents.current.push({ event });
+  }, []) as ClientSocket['emit'];
+
+  const sendMessagePromise = useCallback((...event: Parameters<ClientSocket['emitWithAck']>) => {
+    if (webSocket.current?.connected) return webSocket.current.emitWithAck.apply(webSocket.current, event);
+    return new Promise(resolve => {
+      onConnectEvents.current.push({ event, resolve });
+    });
+  }, []) as ClientSocket['emitWithAck'];
 
   const pressButton = useCallback(() => {
     sendMessage('PRESS');
@@ -30,7 +37,7 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
   const { mutate: connectWebsocket } = useMutation(['socket'], () => axios.post('/api/socket'), {
     onSuccess: () => {
       socketInitializer();
-    }
+    },
   });
 
   useEffect(() => {
@@ -49,15 +56,16 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
   }, [router]);
 
   const socketInitializer = useCallback(() => {
-    const socket = io();
+    const socket: ClientSocket = io();
     socket.on('connect', () => {
       addEventListeners(socket, queryClient);
 
-      onConnectEvents.current.forEach(event => event());
+      onConnectEvents.current.forEach(({ event, resolve }) => {
+        if (resolve) resolve(webSocket.current?.emitWithAck.apply(webSocket.current, event));
+        else webSocket.current?.emit.apply(webSocket.current, event as any);
+      });
       onConnectEvents.current = [];
     });
-
-    socket.on('error', (error: any) => console.error(error));
 
     socket.on('disconnect', () => {
       setTimeout(socketInitializer, 10000);
@@ -70,10 +78,11 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
     () => ({
       isWebsocketConnected: webSocket.current?.connected ?? false,
       sendMessage,
+      sendMessagePromise,
       disconnectWebsocket,
-      pressButton
+      pressButton,
     }),
-    [sendMessage, disconnectWebsocket, pressButton]
+    [sendMessage, sendMessagePromise, disconnectWebsocket, pressButton],
   );
 
   return <WebSocketContext.Provider value={providerValue}>{children}</WebSocketContext.Provider>;

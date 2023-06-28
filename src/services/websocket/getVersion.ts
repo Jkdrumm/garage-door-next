@@ -8,7 +8,7 @@ export function getVersion(socket: Socket, id: string) {
     return {
       version: await versionService.getVersion(),
       timeOfLastCheck: versionService.getLastCheckedForUpdate(),
-      isCurrentlyUpdating: versionService.getIsCurrentlyUpdating()
+      isCurrentlyUpdating: versionService.getIsCurrentlyUpdating(),
     };
   });
 }

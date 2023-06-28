@@ -8,5 +8,5 @@ import { GarageDoorService } from 'services';
  */
 export function prefetchGarageDoorState(queryClient: QueryClient) {
   const doorState = GarageDoorService.getInstance().getDoorState();
-  queryClient.setQueryData(GARAGE_STATE_QUERY_KEY, doorState);
+  queryClient.setQueryData([GARAGE_STATE_QUERY_KEY], doorState);
 }

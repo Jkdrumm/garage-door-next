@@ -24,7 +24,7 @@ import {
   Text,
   useColorModeValue,
   useDisclosure,
-  useToast
+  useToast,
 } from '@chakra-ui/react';
 import { CheckCircleIcon, SmallCloseIcon } from '@chakra-ui/icons';
 import { Field, Form, Formik } from 'formik';
@@ -37,36 +37,36 @@ import {
   useIsMobile,
   useCheckForNewVersion,
   useConfigureDns,
-  useConfigureCertificates
+  useConfigureCertificates,
+  useInstallUpdate,
 } from 'hooks';
 import { prefetchDnsInfo, prefetchVersion } from 'hooks/prefetch';
 import { validateDomain, validateApiSecret, validateApiKey } from 'validations';
 import pack from '../package.json';
-import { useInstallUpdate } from 'hooks/mutations/useInstallUpdate';
 
 function Settings() {
   const { isOpen: isOpenDNS, onOpen: onOpenDNS, onClose: onCloseDNS } = useDisclosure();
   const isMobile = useIsMobile();
   const toast = useToast();
   const [dnsSignInError, setDnsSignInError] = useState<string>('');
-  const { data: dnsInfo } = useDnsInfo();
+  const { data: dnsInfo, isLoading: dnsInfoIsLoading } = useDnsInfo();
   const { data: versionInfo, isLoading: versionInfoIsLoading } = useVersion();
 
   const { mutate: checkForNewVersion, isLoading: isCheckingForNewVersion } = useCheckForNewVersion();
 
-  const { mutate: downloadUpdate } = useInstallUpdate();
+  const { mutate: downloadUpdate, isLoading: isDownloadingUpdate } = useInstallUpdate();
 
-  const { mutate: configureDNS } = useConfigureDns({
+  const { mutateAsync: configureDNS } = useConfigureDns({
     onSuccess: () => {
       toast({
         title: 'DNS Configuration Updated',
         status: 'success',
         position: 'bottom-left',
-        isClosable: true
+        isClosable: true,
       });
       closeDnsDrawer();
     },
-    onError: ({ error }) => setDnsSignInError(error)
+    onError: ({ error }) => setDnsSignInError(error),
   });
 
   const { mutate: configureCertificates, isLoading: isLoadingCertificates } = useConfigureCertificates({
@@ -75,15 +75,15 @@ function Settings() {
         title: 'Certificates Configured',
         status: 'success',
         position: 'bottom-left',
-        isClosable: true
+        isClosable: true,
       }),
     onError: () =>
       toast({
         title: 'Error updating certificates',
         status: 'error',
         position: 'bottom-left',
-        isClosable: true
-      })
+        isClosable: true,
+      }),
   });
 
   function closeDnsDrawer() {
@@ -99,7 +99,6 @@ function Settings() {
         <Heading mb="32px" mt={{ base: '24px', md: '40px' }}>
           Settings
         </Heading>
-
         <Flex
           borderRadius="20px"
           bg={useColorModeValue('white', 'gray.700')}
@@ -120,7 +119,7 @@ function Settings() {
               <Button
                 colorScheme="cyan"
                 onClick={() => downloadUpdate()}
-                isLoading={versionInfo?.isCurrentlyUpdating}
+                isLoading={isDownloadingUpdate || versionInfo?.isCurrentlyUpdating}
                 isDisabled={
                   versionInfoIsLoading || versionInfo?.version === undefined || versionInfo?.version <= pack.version
                 }>
@@ -138,7 +137,7 @@ function Settings() {
                 colorScheme="cyan"
                 onClick={() => checkForNewVersion()}
                 isLoading={isCheckingForNewVersion}
-                isDisabled={versionInfo?.isCurrentlyUpdating}>
+                isDisabled={isDownloadingUpdate || versionInfo?.isCurrentlyUpdating}>
                 Check for New Version
               </Button>
             </Flex>
@@ -168,7 +167,11 @@ function Settings() {
                   DNS: {dnsInfo?.hostname ? <Code fontSize="xl">{dnsInfo?.hostname}</Code> : 'Not Configured'}
                 </Heading>
               </Flex>
-              <Button colorScheme="cyan" onClick={onOpenDNS}>
+              <Button
+                colorScheme="cyan"
+                onClick={onOpenDNS}
+                isDisabled={dnsInfoIsLoading}
+                isLoading={dnsInfo?.isLoggingIn}>
                 Configure
               </Button>
             </Flex>
@@ -201,8 +204,8 @@ function Settings() {
                 onClick={() => {
                   configureCertificates();
                 }}
-                isLoading={isLoadingCertificates}
-                isDisabled={dnsInfo === undefined || !dnsInfo.isLoggedIn}>
+                isLoading={dnsInfo?.isGettingCertificates || isLoadingCertificates}
+                isDisabled={dnsInfoIsLoading || !dnsInfo?.isLoggedIn}>
                 Configure
               </Button>
             </Flex>
@@ -216,11 +219,8 @@ function Settings() {
           <DrawerHeader>Configure DNS</DrawerHeader>
 
           <Formik
-            initialValues={{ key: '', dnsPassword: '', hostname: dnsInfo?.hostname }}
-            onSubmit={params => {
-              const updateParams: any = { ...params };
-              configureDNS(updateParams);
-            }}
+            initialValues={{ key: '', secret: '', hostname: dnsInfo?.hostname ?? '' }}
+            onSubmit={configureDNS}
             validateOnMount={false}>
             {props => (
               <Form>
@@ -233,7 +233,6 @@ function Settings() {
                     DNS, create an API key and enter the key and secret here. Choose &quot;production&quot; when asked
                     for an environment.
                   </Text>
-
                   <Field name="key" validate={validateApiKey}>
                     {({ field, form }: { field: any; form: any }) => (
                       <FormControl isInvalid={form.errors.key && form.touched.key}>
@@ -270,7 +269,6 @@ function Settings() {
                     </Text>
                   )}
                 </DrawerBody>
-
                 <DrawerFooter>
                   <Button variant="outline" mr={3} onClick={onCloseDNS}>
                     Cancel

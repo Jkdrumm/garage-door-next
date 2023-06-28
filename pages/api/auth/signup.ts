@@ -36,14 +36,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     lastName,
     username,
     password: await hash(password, 12),
-    adminLevel
+    adminLevel,
   });
   UsersService.getInstance().addUser({
     id: status.insertedId.toString(),
     firstName,
     lastName,
     username,
-    userLevel: adminLevel
+    userLevel: adminLevel,
   });
   res.status(201).json({ message: 'User created', ...status });
   await client.close();

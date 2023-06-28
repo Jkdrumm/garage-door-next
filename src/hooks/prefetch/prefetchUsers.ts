@@ -8,5 +8,5 @@ import { USERS_QUERY_KEY } from 'hooks';
  */
 export function prefetchUsers(queryClient: QueryClient) {
   const users = getUsers();
-  queryClient.setQueryData(USERS_QUERY_KEY, users);
+  queryClient.setQueryData([USERS_QUERY_KEY], users);
 }

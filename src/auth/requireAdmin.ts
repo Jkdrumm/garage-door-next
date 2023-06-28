@@ -23,17 +23,17 @@ export function requireAdmin(getServerSideProps?: GetServerSideProps): GetServer
       const serverSideResult = {
         props: {
           dehydratedState: dehydrate(queryClient),
-          cookies: context.req.headers.cookie ?? ''
-        }
+          cookies: context.req.headers.cookie ?? '',
+        },
       };
       if (getServerSideProps) {
         const nestedServerSideResult = (await getServerSideProps(context)) as any;
         serverSideResult.props.dehydratedState.queries = nestedServerSideResult.props.dehydratedState.queries.concat(
-          serverSideResult.props.dehydratedState.queries
+          serverSideResult.props.dehydratedState.queries,
         );
         serverSideResult.props.dehydratedState.mutations =
           nestedServerSideResult.props.dehydratedState.mutations.concat(
-            serverSideResult.props.dehydratedState.mutations
+            serverSideResult.props.dehydratedState.mutations,
           );
       }
       return serverSideResult;
@@ -41,8 +41,8 @@ export function requireAdmin(getServerSideProps?: GetServerSideProps): GetServer
       return {
         redirect: {
           destination: '/home',
-          permanent: false
-        }
+          permanent: false,
+        },
       };
     }
   };

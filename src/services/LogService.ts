@@ -1,9 +1,11 @@
 import { MongoClient } from 'mongodb';
-import { LogEntry, LogEntryResult, LogEvent, LogLength } from 'types';
-import { WebSocketService } from 'services';
-import { UserLevel } from 'enums';
+import { LogEntry, LogEntryResult, LogLength } from 'types';
+import { WebSocketService } from './WebSocketService';
+import { LogEvent } from 'enums';
 
 export class LogService {
+  private logCache: LogEntry[] | undefined = undefined;
+
   private constructor() {
     this.addEntry(LogEvent.BOOT, {});
     const ogConsoleError = console.error;
@@ -33,12 +35,12 @@ export class LogService {
             'https://nextjs.org/docs/messages/fast-refresh-reload',
             'Fast Refresh had to perform a full reload due to a runtime error.',
             'FAKE CERTIFICATES (for testing) only',
-            '[staging] ACME Staging Directory URL: https://acme-staging-v02.api.letsencrypt.org/directory'
+            '[staging] ACME Staging Directory URL: https://acme-staging-v02.api.letsencrypt.org/directory',
           ].some(
             element =>
               message?.toString().includes(element) ||
               optionalParams?.some(element => element?.toString().includes(element)) ||
-              !message
+              !message,
           )
         )
           return;
@@ -48,9 +50,24 @@ export class LogService {
         ogConsoleLog(message, ...optionalParams);
         // Don't save logs for build info in development
         if (optionalParams[0]?.toString().startsWith('compil')) return;
+        // Don't save logs for env info in development
+        if (optionalParams[0]?.toString().includes('Loaded env from ')) return;
         this.addEntry(LogEvent.LOG, { data: this.getMessage(message, ...optionalParams) });
       };
     }
+
+    // Load logs from the current day into the cache
+    this.getLogs(new Date().toLocaleDateString(), 'day').then(logs => (this.logCache = logs));
+    // Get the ms until the next day
+    const msUntilNextDay = new Date(new Date().toLocaleDateString()).getTime() + 86400000 - Date.now();
+    // Refresh the cache at the start of the next day
+    setTimeout(() => {
+      this.logCache = [];
+      // Refresh the cache every day
+      setInterval(() => {
+        this.getLogs(new Date().toLocaleDateString(), 'day').then(logs => (this.logCache = logs));
+      }, 86400000);
+    }, msUntilNextDay);
   }
 
   /**
@@ -63,7 +80,7 @@ export class LogService {
     const regex = /\u009b[[()#;?]*(?:\d{1,4}(?:;\d{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
     return JSON.stringify({
       message: message?.toString ? message?.toString().replace(regex, '') : message,
-      optionalParams: optionalParams.map(element => element?.toString().replace(regex, ''))
+      optionalParams: optionalParams.map(element => element?.toString().replace(regex, '')),
     });
   }
 
@@ -83,6 +100,7 @@ export class LogService {
    * @returns
    */
   public async getLogs(date: string, length: LogLength) {
+    if (this.logCache && length === 'day') return this.logCache;
     const startDate = new Date(date);
     startDate.setDate(startDate.getDate() + 1);
     const endDate = new Date(date);
@@ -90,7 +108,7 @@ export class LogService {
     else if (length === 'week') endDate.setDate(endDate.getDate() - 6);
     const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
     const db = client.db();
-    return new Promise<LogEntry[]>((resolve, reject) => {
+    const logs = await new Promise<LogEntry[]>((resolve, reject) => {
       db.collection('logs')
         .find({ date: { $gte: endDate.toISOString(), $lt: startDate.toISOString() } })
         .toArray((error, result) => {
@@ -99,12 +117,16 @@ export class LogService {
           else if (!result) reject('No result');
           else {
             const formattedResult = result
-              .map(({ _id, ...rest }) => ({ id: _id.toString(), ...rest }))
+              .map(({ _id, ...rest }) => {
+                const values = { id: _id.toString(), ...rest };
+                return values;
+              })
               .reverse() as LogEntry[];
             resolve(formattedResult);
           }
         });
     });
+    return logs;
   }
 
   /**
@@ -114,7 +136,7 @@ export class LogService {
    */
   public addEntry(
     event: LogEvent,
-    { oldValue, newValue, userId, username, firstName, lastName, data }: Omit<LogEntryResult, 'id' | 'event' | 'date'>
+    { oldValue, newValue, userId, username, firstName, lastName, data }: Omit<LogEntryResult, 'id' | 'event' | 'date'>,
   ) {
     const log = {
       event,
@@ -125,16 +147,19 @@ export class LogService {
       username,
       firstName,
       lastName,
-      data
+      data,
     };
     MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`)
       .then(async client => {
         const db = client.db();
         const result = await db.collection('logs').insertOne(log);
-        WebSocketService.getInstance().emitMessage('LIVE_LOG', UserLevel.ADMIN, {
+        const newLog = {
           id: result.insertedId.toString(),
-          ...log
-        } as LogEntry);
+          ...log,
+        } as LogEntry;
+        delete (newLog as any)._id;
+        this.logCache?.unshift(newLog);
+        WebSocketService.getInstance().emitMessage('LIVE_LOG', newLog);
         await client.close();
       })
       .catch(console.error);

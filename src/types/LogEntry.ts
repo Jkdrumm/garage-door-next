@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { GarageState } from 'enums';
+import { GarageState, LogEvent } from 'enums';
 
 export type LogEntry = (
   | {
@@ -33,17 +33,5 @@ export type LogEntryResult = {
   date: string;
   data?: string;
 };
-
-export enum LogEvent {
-  STATE_CHANGE = 'state',
-  PRESS = 'press',
-  BOOT = 'boot',
-  SHUT_DOWN = 'shutdown',
-  DNS_UPDATE = 'dns',
-  CERTIFICATES = 'certificate',
-  ERROR = 'error',
-  WARN = 'warn',
-  LOG = 'log'
-}
 
 export type LogLength = 'day' | 'week' | 'month';

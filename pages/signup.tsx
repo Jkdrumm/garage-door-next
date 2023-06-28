@@ -8,7 +8,7 @@ import {
   Input,
   InputGroup,
   InputRightElement,
-  Text
+  Text,
 } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import axios from 'axios';
@@ -30,7 +30,7 @@ function SignUp() {
     const { ok } = (await signIn('credentials', {
       redirect: false,
       username,
-      password
+      password,
     })) as any;
     if (!ok) {
       // If account was created but there was an error logging in for some reason, just return to the login page.
@@ -47,8 +47,8 @@ function SignUp() {
       axios.post('/api/auth/signup', user),
     {
       onSuccess: createAccountSuccess,
-      onError: createAccountError
-    }
+      onError: createAccountError,
+    },
   );
 
   return (

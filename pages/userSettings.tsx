@@ -30,7 +30,7 @@ import {
   Tr,
   useDisclosure,
   useToast,
-  useColorModeValue
+  useColorModeValue,
 } from '@chakra-ui/react';
 import type { User } from 'types';
 import TextTransition, { presets } from 'react-text-transition';
@@ -74,7 +74,7 @@ function UserSettings() {
       title: 'User updated',
       status: 'success',
       position: 'bottom-left',
-      isClosable: true
+      isClosable: true,
     });
   };
 
@@ -83,13 +83,13 @@ function UserSettings() {
       title: 'Error updating user',
       status: 'error',
       position: 'bottom-left',
-      isClosable: true
+      isClosable: true,
     });
   };
 
   const { mutate: updateUser } = useUpdateUser({
     onSuccess: updateUserSuccess,
-    onError: updateUserError
+    onError: updateUserError,
   });
 
   const deleteUserSuccess = () => {
@@ -98,7 +98,7 @@ function UserSettings() {
       title: 'User deleted',
       status: 'success',
       position: 'bottom-left',
-      isClosable: true
+      isClosable: true,
     });
   };
 
@@ -107,13 +107,13 @@ function UserSettings() {
       title: 'Error deleting user',
       status: 'error',
       position: 'bottom-left',
-      isClosable: true
+      isClosable: true,
     });
   };
 
   const { mutate: deleteUser } = useDeleteUser({
     onSuccess: deleteUserSuccess,
-    onError: deleteUserError
+    onError: deleteUserError,
   });
 
   const handleOpen = (user: User) => {
@@ -145,7 +145,7 @@ function UserSettings() {
             description: button.description,
             isClosable: true,
             duration: null,
-            onCloseComplete: () => (toastIdRef.current = undefined)
+            onCloseComplete: () => (toastIdRef.current = undefined),
           };
           if (toastIdRef.current) {
             clearTimeout(timerIdRef.current);
@@ -161,9 +161,9 @@ function UserSettings() {
   };
 
   const saveButtonClick = () => {
-    const args = { id: `${selectedUser?.id}`, userLevel: selectedLevel };
-    if (deleteConfirmationChecked) deleteUser(args);
-    else updateUser(args);
+    const id = `${selectedUser?.id}`;
+    if (deleteConfirmationChecked) deleteUser({ id });
+    else updateUser({ id, userLevel: selectedLevel });
   };
 
   return (
@@ -253,27 +253,27 @@ function UserSettings() {
                   userLevel: UserLevel.ADMIN,
                   colorScheme: 'red',
                   description:
-                    'Allows for full unrestricted control over the garage door and all settings. Intended only for trusted household members.'
+                    'Allows for full unrestricted control over the garage door and all settings. Intended only for trusted household members.',
                 },
                 {
                   label: 'User',
                   userLevel: UserLevel.USER,
                   colorScheme: 'yellow',
-                  description: 'Allows for moving the garage door and viewing if the garage is open/closed.'
+                  description: 'Allows for moving the garage door and viewing if the garage is open/closed.',
                 },
                 {
                   label: 'Viewer',
                   userLevel: UserLevel.VIEWER,
                   colorScheme: 'green',
-                  description: 'Allows only for viewing if the garage is open/closed.'
+                  description: 'Allows only for viewing if the garage is open/closed.',
                 },
                 {
                   label: 'Account',
                   userLevel: UserLevel.ACCOUNT,
                   colorScheme: 'blue',
                   description:
-                    'Does not allow viewing or moving of the garage door. New users are automatically placed here.'
-                }
+                    'Does not allow viewing or moving of the garage door. New users are automatically placed here.',
+                },
               ].map((button: UserLevelButtonDetails) => (
                 <Flex align="center" key={button.label}>
                   {getAdminInfo(button)}

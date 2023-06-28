@@ -8,7 +8,7 @@ import {
   Input,
   InputGroup,
   InputRightElement,
-  Text
+  Text,
 } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { Formik, Form, Field } from 'formik';
@@ -33,7 +33,7 @@ function Index() {
           const { error, ok } = (await signIn('credentials', {
             redirect: false,
             username,
-            password
+            password,
           })) as any;
           if (!ok) {
             setLoginError(error);
