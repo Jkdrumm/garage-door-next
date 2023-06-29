@@ -3,7 +3,7 @@ import {
   forwardRef,
   Link as ChakraLink,
   LinkProps as ChakraLinkProps,
-  useStyleConfig
+  useStyleConfig,
 } from '@chakra-ui/react';
 import NextLink from 'next/link';
 import type { LinkProps as NextLinkProps } from 'next/dist/client/link';
@@ -34,5 +34,5 @@ export const Link = forwardRef<LinkProps & ChakraProps, 'a'>(
         </ChakraLink>
       </NextLink>
     );
-  }
+  },
 );

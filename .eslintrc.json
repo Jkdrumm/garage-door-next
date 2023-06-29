@@ -3,5 +3,12 @@
   "globals": {
     "React": true,
     "NodeJS": true
+  },
+  "env": {
+    "es6": true
+  },
+  "rules": {
+    "require-yield": "off",
+    "no-redeclare": "off"
   }
 }

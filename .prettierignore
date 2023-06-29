@@ -1,0 +1,6 @@
+/.config/
+/build/
+/.next/
+/greenlock.d/
+/node_modules/
+.greenlockrc

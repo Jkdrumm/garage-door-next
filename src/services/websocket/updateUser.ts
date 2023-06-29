@@ -19,6 +19,6 @@ export function updateUser(socket: Socket, id: string) {
         .updateOne({ _id: new ObjectId(updateUserId) }, { $set: updateParameters });
       if (updateResult.acknowledged) UsersService.getInstance().updateUserLevel(updateUserId, userLevel);
       await client.close();
-    }
+    },
   );
 }

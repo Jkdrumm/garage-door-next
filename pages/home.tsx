@@ -32,7 +32,7 @@ function Home() {
       <FiUnlock {...iconStyles} key={1} />,
       <FiLock {...iconStyles} key={2} />,
       <FiAlertCircle {...iconStyles} key={3} />,
-      <FiLoader {...iconStyles} key={4} />
+      <FiLoader {...iconStyles} key={4} />,
     ][doorState];
   }
 

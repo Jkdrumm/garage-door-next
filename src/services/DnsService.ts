@@ -3,8 +3,8 @@ import { getCurrentIp, updateRecords } from 'godaddy-dns';
 import Greenlock from 'greenlock';
 import fs from 'fs';
 import path from 'path';
-import { LogEvent } from 'types';
-import { LogService } from 'services';
+import { LogEvent } from 'enums';
+import { LogService, WebSocketService } from 'services';
 import pkg from '../../package.json';
 
 export class DnsService {
@@ -19,11 +19,16 @@ export class DnsService {
 
   private greenlock: any;
 
+  private isLoggingIn: boolean;
+  private isGettingCertificates: boolean;
+
   private constructor() {
     this.key = null;
     this.secret = null;
     this.hostname = null;
     this.isLoggedIn = false;
+    this.isLoggingIn = false;
+    this.isGettingCertificates = false;
     this.greenlock = Greenlock.create({
       packageRoot: process.cwd(),
       configDir: './greenlock.d',
@@ -36,7 +41,7 @@ export class DnsService {
           // `details` is an error object in this case
           console.error(details);
         }
-      }
+      },
     });
     this.loadDNS().catch(console.error);
   }
@@ -76,6 +81,20 @@ export class DnsService {
   }
 
   /**
+   * Gets if the system is currently configuring DNS.
+   */
+  public getIsLoggingIn() {
+    return this.isLoggingIn;
+  }
+
+  /**
+   * Gets if the system is currently getting certificates.
+   */
+  public getIsGettingCertificates() {
+    return this.isGettingCertificates;
+  }
+
+  /**
    * Logs-in to GoDaddy.
    * @param newLogin If this is a new login or not
    * @param key The API key
@@ -86,27 +105,38 @@ export class DnsService {
     newLogin: boolean = false,
     key: string = this.key ?? '',
     secret: string = this.secret ?? '',
-    hostname: string = this.hostname ?? ''
+    hostname: string = this.hostname ?? '',
   ) {
-    const currentIp = await getCurrentIp();
-    if (newLogin || this.lastRefreshIP === undefined || this.lastRefreshIP !== currentIp) {
-      this.lastRefreshIP = currentIp;
-      await updateRecords(currentIp, {
-        apiKey: key,
-        secret: secret,
-        domain: hostname,
-        records: [{ type: 'A', name: '@', ttl: 3600 }]
-      });
-      LogService.getInstance().addEntry(LogEvent.DNS_UPDATE, {
-        data: JSON.stringify({ ip: currentIp, hostname })
-      });
-      this.isLoggedIn = true;
-      this.setCertificateTimer();
+    if (this.isLoggingIn) throw new Error('Already configuring DNS');
+    this.isLoggingIn = true;
+    WebSocketService.getInstance().emitMessage('DNS_LOGIN');
+    try {
+      const currentIp = await getCurrentIp();
+      if (newLogin || this.lastRefreshIP === undefined || this.lastRefreshIP !== currentIp) {
+        this.lastRefreshIP = currentIp;
+        await updateRecords(currentIp, {
+          apiKey: key,
+          secret: secret,
+          domain: hostname,
+          records: [{ type: 'A', name: '@', ttl: 3600 }],
+        });
+        LogService.getInstance().addEntry(LogEvent.DNS_UPDATE, {
+          data: JSON.stringify({ ip: currentIp, hostname }),
+        });
+        this.isLoggedIn = true;
+        this.setCertificateTimer();
+      }
+      if (this.refreshTimer) clearTimeout(this.refreshTimer);
+      this.refreshTimer = setTimeout(() => {
+        this.login().catch(console.error);
+      }, 3600000);
+      this.isLoggingIn = false;
+      WebSocketService.getInstance().emitMessage('DNS_LOGIN_COMPLETE', true);
+    } catch (error) {
+      this.isLoggingIn = false;
+      WebSocketService.getInstance().emitMessage('DNS_LOGIN_COMPLETE', this.isLoggedIn);
+      throw error;
     }
-    if (this.refreshTimer) clearTimeout(this.refreshTimer);
-    this.refreshTimer = setTimeout(() => {
-      this.login().catch(console.error);
-    }, 3600000);
   }
 
   private setCertificateTimer() {
@@ -206,6 +236,9 @@ export class DnsService {
    * @throws Error when unable to get new certificates
    */
   public async getNewCertificates() {
+    if (this.isGettingCertificates) throw new Error('Already getting certificates');
+    this.isGettingCertificates = true;
+    WebSocketService.getInstance().emitMessage('GETTING_CERTIFICATES');
     try {
       if (!this.isLoggedIn) throw new Error('DNS Login must be configured first');
 
@@ -217,15 +250,15 @@ export class DnsService {
         staging: true,
         store: {
           module: 'greenlock-store-fs',
-          basePath: process.cwd() + '/.config/greenlock'
+          basePath: process.cwd() + '/.config/greenlock',
         },
         challenges: {
           'dns-01': {
             module: 'acme-dns-01-godaddy',
             key: this.key,
-            secret: this.secret
-          }
-        }
+            secret: this.secret,
+          },
+        },
       });
 
       const { pems } = await this.greenlock.get({ servername: this.hostname });
@@ -234,12 +267,13 @@ export class DnsService {
         LogService.getInstance().addEntry(LogEvent.CERTIFICATES, {});
         this.setCertificateTimer();
       } else throw new Error('Unable to retreive certificates');
+      this.isGettingCertificates = false;
+      WebSocketService.getInstance().emitMessage('GETTING_CERTIFICATES_COMPLETE', true);
     } catch (error) {
       console.error(error);
+      this.isGettingCertificates = false;
+      WebSocketService.getInstance().emitMessage('GETTING_CERTIFICATES_COMPLETE', this.getIsRunningHttps());
       throw error;
     }
   }
 }
-
-// Load the service immideately
-DnsService.getInstance();

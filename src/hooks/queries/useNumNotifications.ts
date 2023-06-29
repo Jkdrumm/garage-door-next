@@ -1,25 +1,12 @@
-import { useContext } from 'react';
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { QueryOptions } from 'types';
-import { WebSocketContext, WebSocketContextValue } from 'components';
+import { useQuery, UseQueryOptions } from './useQuery';
 
-export const NOTIFICATION_QUERY_KEY = ['notifications'];
-const API_ROUTE = 'GET_NUM_NOTIFICATIONS';
-
-async function FETCH_FUNC(sendMessage: WebSocketContextValue['sendMessage']): Promise<number> {
-  return new Promise(resolve =>
-    sendMessage(API_ROUTE, undefined, ({ data }) => {
-      resolve(data);
-    })
-  );
-}
+export const NOTIFICATION_QUERY_KEY = 'GET_NUM_NOTIFICATIONS';
 
 /**
  * A React Query {@link https://tanstack.com/query/v4/docs/reference/useQuery useQuery} hook to get the notification count for a user.
  * @param options The React Query Options
  * @returns A useQuery hook
  */
-export const useNumNotifications = (options?: QueryOptions): UseQueryResult<number> => {
-  const { sendMessage } = useContext(WebSocketContext);
-  return useQuery<number>(NOTIFICATION_QUERY_KEY, () => FETCH_FUNC(sendMessage), options);
-};
+export function useNumNotifications(options?: UseQueryOptions<number>) {
+  return useQuery<number>([NOTIFICATION_QUERY_KEY], options);
+}

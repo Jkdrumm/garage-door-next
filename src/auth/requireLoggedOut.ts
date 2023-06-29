@@ -14,8 +14,8 @@ export function requireLoggedOut(getServerSideProps?: GetServerSideProps): GetSe
       return {
         redirect: {
           destination: '/home',
-          permanent: false
-        }
+          permanent: false,
+        },
       };
     } catch (e) {
       if (getServerSideProps) return getServerSideProps(context);

@@ -5,6 +5,6 @@ import { GarageDoorService } from 'services';
 
 export function press(socket: Socket, id: string) {
   addEventListener(socket, id, 'PRESS', () => GarageDoorService.getInstance().pressButton(id), {
-    userLevel: UserLevel.USER
+    userLevel: UserLevel.USER,
   });
 }

@@ -13,7 +13,7 @@ export function getNumNotifications(socket: Socket, id: string) {
       return UsersService.getInstance().getNotificationCount(userLevel);
     },
     {
-      userLevel: UserLevel.ACCOUNT
-    }
+      userLevel: UserLevel.ACCOUNT,
+    },
   );
 }

@@ -7,5 +7,5 @@ import { NOTIFICATION_QUERY_KEY } from 'hooks/queries';
  * @param numNotifications The number of notifcations
  */
 export function prefetchNotificationCount(queryClient: QueryClient, numNotifications: number) {
-  queryClient.setQueryData(NOTIFICATION_QUERY_KEY, numNotifications);
+  queryClient.setQueryData([NOTIFICATION_QUERY_KEY], numNotifications);
 }

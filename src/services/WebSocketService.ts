@@ -1,9 +1,9 @@
-import { UserLevel, GarageState, GarageLiveEvent } from 'enums';
-import { Socket, User } from 'types';
+import { UserLevel, GarageState } from 'enums';
+import { ServerSocket, User } from 'types';
 import { GarageDoorService, UsersService } from 'services';
 import { addEventListeners } from './websocket';
 
-export type WebSocketConnection = { id: string; socket: Socket; expires: string };
+export type WebSocketConnection = { id: string; socket: ServerSocket; expires: string };
 
 export type WebSocketClients = { [key: string]: { connections: WebSocketConnection[]; userLevel: UserLevel } };
 
@@ -28,14 +28,14 @@ export class WebSocketService {
    * @param userLevel The user level of the user
    * @param expires The expiration of the websocket
    */
-  public async addSocket(socket: Socket, id: string, userLevel: UserLevel, expires: string) {
+  public async addSocket(socket: ServerSocket, id: string, userLevel: UserLevel, expires: string) {
     const webSocketClients = this.getWebsocketClients();
     const usersCurrentSockets = webSocketClients[id];
     const webSocketConnection = { id: socket.id, socket, expires };
     if (usersCurrentSockets === undefined) {
       webSocketClients[id] = {
         userLevel,
-        connections: [webSocketConnection]
+        connections: [webSocketConnection],
       };
     } else {
       usersCurrentSockets.connections.push(webSocketConnection);
@@ -73,15 +73,22 @@ export class WebSocketService {
   }
 
   /**
+   * Sends a message to all admins.
+   */
+  public emitMessage(...args: Parameters<ServerSocket['emit']>) {
+    this.emitMessageToUserLevel(UserLevel.ADMIN, ...args);
+  }
+
+  /**
    * Sends a message to all clients of the specified user level and above.
    */
-  public emitMessage(type: GarageLiveEvent, userLevel: UserLevel, message?: any) {
+  public emitMessageToUserLevel(userLevel: UserLevel, ...args: Parameters<ServerSocket['emit']>) {
     const connectionsToTimeout = [];
     const webSocketClients = this.getWebsocketClients();
     for (const [, singleUserConnections] of Object.entries(webSocketClients))
       if (singleUserConnections.userLevel >= userLevel)
         for (const [, socket] of Object.entries(singleUserConnections.connections))
-          if (new Date(socket.expires) >= new Date()) socket.socket.emit(type, message);
+          if (new Date(socket.expires) >= new Date()) socket.socket.emit.apply(socket.socket, args);
           else connectionsToTimeout.push(socket);
     connectionsToTimeout.forEach(socket => {
       socket.socket.emit('SESSION_TIMEOUT');
@@ -128,7 +135,7 @@ export class WebSocketService {
    * @param socket The socket to send the messages to
    * @param userLevel The admin level of the user
    */
-  private onConnectMessage(socket: Socket, userLevel: UserLevel) {
+  private onConnectMessage(socket: ServerSocket, userLevel: UserLevel) {
     const message: { userLevel: UserLevel; garageState?: GarageState; numNotifications?: number } = { userLevel };
     if (userLevel >= UserLevel.VIEWER) {
       const currentGarageState = GarageDoorService.getInstance().getDoorState();

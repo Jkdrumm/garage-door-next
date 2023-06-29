@@ -16,11 +16,11 @@ export async function prefetchVersion(queryClient: QueryClient) {
       const versionInfo = {
         version,
         timeOfLastCheck: versionService.getLastCheckedForUpdate(),
-        isCurrentlyUpdating: versionService.getIsCurrentlyUpdating()
+        isCurrentlyUpdating: versionService.getIsCurrentlyUpdating(),
       };
-      queryClient.setQueryData(VERSION_QUERY_KEY, versionInfo);
+      queryClient.setQueryData([VERSION_QUERY_KEY], versionInfo);
       return;
     }
   }
-  await queryClient.invalidateQueries(VERSION_QUERY_KEY);
+  await queryClient.invalidateQueries([VERSION_QUERY_KEY]);
 }

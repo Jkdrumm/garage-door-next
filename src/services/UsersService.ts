@@ -41,7 +41,7 @@ export class UsersService {
             firstName: user.firstName,
             lastName: user.lastName,
             username: user.username,
-            userLevel: user.adminLevel
+            userLevel: user.adminLevel,
           }));
           if (resultsPasswordRemoved === undefined) throw new Error('Users is undefined');
           else {
@@ -99,7 +99,7 @@ export class UsersService {
       cacheEntry.userLevel = userLevel;
       const websocketService = WebSocketService.getInstance();
       websocketService.notifyUserLevel(id, userLevel);
-      websocketService.emitMessage('USER_UPDATED', UserLevel.ADMIN, { id, userLevel });
+      websocketService.emitMessage('USER_UPDATED', { id, userLevel });
     }
   }
 
@@ -113,7 +113,7 @@ export class UsersService {
     if (cacheEntry !== undefined) {
       if (firstName) cacheEntry.firstName = firstName;
       if (lastName) cacheEntry.lastName = lastName;
-      WebSocketService.getInstance().emitMessage('USER_UPDATED', UserLevel.ADMIN, { id, firstName, lastName });
+      WebSocketService.getInstance().emitMessage('USER_UPDATED', { id, firstName, lastName });
     }
   }
 
@@ -124,13 +124,12 @@ export class UsersService {
    */
   public removeUser(id: string): boolean {
     const cacheEntry = this.usersCache[id];
-    if (cacheEntry !== undefined) {
-      delete this.usersCache[id];
-      const webSocketService = WebSocketService.getInstance();
-      webSocketService.signOutUser(id);
-      webSocketService.emitMessage('USER_DELETED', UserLevel.ADMIN, { id });
-      return true;
-    } else return false;
+    if (!cacheEntry) return false;
+    delete this.usersCache[id];
+    const webSocketService = WebSocketService.getInstance();
+    webSocketService.signOutUser(id);
+    webSocketService.emitMessage('USER_DELETED', id);
+    return true;
   }
 
   /**
@@ -157,7 +156,7 @@ export class UsersService {
    */
   public addUser(user: User) {
     this.usersCache[user.id] = user;
-    WebSocketService.getInstance().emitMessage('NEW_USER', UserLevel.ADMIN, user);
+    WebSocketService.getInstance().emitMessage('NEW_USER', user);
   }
 
   /**

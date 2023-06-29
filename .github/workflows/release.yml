@@ -48,7 +48,9 @@ jobs:
 
       # Step 4: Compress files
       - name: Compress files
-        run: zip -r release.zip .next .env package.json package-lock.json public server.js
+        run: |
+          cd build
+          zip -r ../release.zip . -x tsconfig.tsbuildinfo
 
       # Step 5: Upload build artifacts as release assets
       - name: Upload release assets

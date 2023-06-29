@@ -22,7 +22,7 @@ import {
   useColorMode,
   useColorModeValue,
   useDisclosure,
-  VStack
+  VStack,
 } from '@chakra-ui/react';
 import {
   FiHome,
@@ -33,7 +33,7 @@ import {
   FiUser,
   FiUsers,
   FiLogOut,
-  FiFileText
+  FiFileText,
 } from 'react-icons/fi';
 import { IconType } from 'react-icons';
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
@@ -54,7 +54,7 @@ const LinkItems: Array<LinkItemProps> = [
   { name: 'Profile', icon: FiUser, href: '/profile' },
   { name: 'Settings', icon: FiSettings, requiredLevel: UserLevel.ADMIN, href: '/settings' },
   { name: 'User Settings', icon: FiUsers, requiredLevel: UserLevel.ADMIN, href: '/userSettings' },
-  { name: 'Logs', icon: FiFileText, requiredLevel: UserLevel.ADMIN, href: '/logs' }
+  { name: 'Logs', icon: FiFileText, requiredLevel: UserLevel.ADMIN, href: '/logs' },
 ];
 
 const title = 'Garage Door 3.0';
@@ -148,7 +148,7 @@ function NavItem({ icon, href, children, ...rest }: NavItemProps) {
         cursor="pointer"
         _hover={{
           bg: 'purple.400',
-          color: 'white'
+          color: 'white',
         }}
         {...rest}>
         {icon && (
@@ -156,7 +156,7 @@ function NavItem({ icon, href, children, ...rest }: NavItemProps) {
             mr="4"
             fontSize="16"
             _groupHover={{
-              color: 'white'
+              color: 'white',
             }}
             as={icon}
           />

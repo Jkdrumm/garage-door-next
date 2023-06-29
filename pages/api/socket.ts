@@ -1,6 +1,6 @@
 import type { NextApiHandler, NextApiRequest } from 'next';
 import { Server, ServerOptions } from 'socket.io';
-import type { Socket, SocketApiResponse } from 'types';
+import type { ServerSocket, SocketApiResponse } from 'types';
 import { WebSocketService } from 'services';
 import { apiRequireLoggedIn } from 'auth';
 import { getUserLevel, getSession, getUser } from 'auth/get';
@@ -24,7 +24,7 @@ async function socket(req: NextApiRequest, res: SocketApiResponse) {
   }
   res.socket.server.io.on(
     'connection',
-    async (socket: Socket) => await WebSocketService.getInstance().addSocket(socket, id, userLevel, expires)
+    async (socket: ServerSocket) => await WebSocketService.getInstance().addSocket(socket, id, userLevel, expires),
   );
   res.end();
 }
@@ -33,6 +33,6 @@ export default apiRequireLoggedIn(socket as NextApiHandler);
 
 export const config = {
   api: {
-    externalResolver: true
-  }
+    externalResolver: true,
+  },
 };

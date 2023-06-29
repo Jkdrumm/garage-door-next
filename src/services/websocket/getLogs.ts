@@ -4,7 +4,11 @@ import { LogService } from 'services';
 import { addEventListener } from './utils';
 
 export function getLogs(socket: Socket, id: string) {
-  addEventListener(socket, id, 'GET_LOGS', ({ date, length }: { date: string; length: LogLength }) =>
-    LogService.getInstance().getLogs(date, length)
+  addEventListener(
+    socket,
+    id,
+    'GET_LOGS',
+    async ({ date, length }: { date: string; length: LogLength }) =>
+      await LogService.getInstance().getLogs(date, length),
   );
 }

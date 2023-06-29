@@ -8,7 +8,7 @@ import {
   Button,
   Grid,
   Spacer,
-  forwardRef
+  forwardRef,
 } from '@chakra-ui/react';
 import { useIsMobile } from 'hooks';
 

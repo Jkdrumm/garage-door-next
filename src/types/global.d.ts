@@ -6,7 +6,7 @@ import type {
   OpenSslService,
   UsersService,
   VersionService,
-  WebSocketService
+  WebSocketService,
 } from 'services';
 
 /**

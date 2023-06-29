@@ -16,11 +16,11 @@ import {
   Tr,
   Tbody,
   Td,
-  forwardRef
+  forwardRef,
 } from '@chakra-ui/react';
 import { FiChevronDown } from 'react-icons/fi';
-import { GarageState } from 'enums';
-import { LogEntryResult, LogEvent } from 'types';
+import { GarageState, LogEvent } from 'enums';
+import { LogEntryResult } from 'types';
 import { theme } from 'theme';
 
 export interface LogCardProps extends Omit<LogEntryResult, 'id'> {}
@@ -29,8 +29,8 @@ export interface LogCardProps extends Omit<LogEntryResult, 'id'> {}
  * A styled Log entry.
  */
 export const LogCard = forwardRef(
-  // eslint-disable-next-line no-unused-vars
-  ({ event, date, oldValue, newValue, username, firstName, lastName, data, userId, ...props }, ref) => {
+  ({ event, date, oldValue, newValue, username, firstName, lastName, data, ...props }, ref) => {
+    delete props.userId;
     const dateObject = new Date(date);
     const timeFormatted = dateObject.toLocaleTimeString();
 
@@ -170,5 +170,5 @@ export const LogCard = forwardRef(
         </Box>
       </Box>
     );
-  }
+  },
 );

@@ -11,7 +11,7 @@ export default NextAuth({
     CredentialsProvider({
       credentials: {
         username: { label: 'Username', type: 'text' },
-        password: { label: 'Password', type: 'password' }
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         const password = credentials?.password ?? '';
@@ -30,10 +30,10 @@ export default NextAuth({
         }
         await client.close();
         return {
-          id: result._id.toString()
+          id: result._id.toString(),
         };
-      }
-    })
+      },
+    }),
   ],
   session: { strategy: 'jwt' },
   callbacks: {
@@ -45,7 +45,7 @@ export default NextAuth({
     jwt: async ({ token, user }) => {
       if (user) token.user = user;
       return token;
-    }
+    },
   },
-  secret: OpenSslService.getInstance().getRand()
+  secret: OpenSslService.getInstance().getRand(),
 });

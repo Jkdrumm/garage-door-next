@@ -22,7 +22,7 @@ const PageComponent = ({ Component, pageProps, router }: AppPropsWithLayout) => 
     <>
       <Component {...pageProps} router={router} />
       <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
-    </>
+    </>,
   );
 };
 
