@@ -343,11 +343,12 @@ function UserSettings() {
   );
 }
 
+export default UserSettings;
+
 export const getServerSideProps = requireAdmin(async () => {
   const queryClient = new QueryClient();
   prefetchUsers(queryClient);
   return { props: { dehydratedState: dehydrate(queryClient) } };
 });
-UserSettings.getLayout = useMainLayout;
 
-export default UserSettings;
+UserSettings.getLayout = useMainLayout;
