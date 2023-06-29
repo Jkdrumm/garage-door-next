@@ -8,9 +8,10 @@ import { LogEntry } from 'types';
  * @param queryClient {@link QueryClient}
  */
 export async function prefetchLogs(queryClient: QueryClient) {
-  const date = new Date().toLocaleDateString();
+  const logService = LogService.getInstance();
+  const date = logService.formatDate(new Date());
   // Get all logs from the current day and convert all undefined values to null since undefined is not valid JSON.
-  const logs = (await LogService.getInstance().getLogs(date, 'day')).map(log => {
+  const logs = (await logService.getLogs(date, 'day')).map(log => {
     Object.keys(log).forEach(key => {
       if (log[key as keyof LogEntry] === undefined) log[key as keyof LogEntry] = null as any;
     });
