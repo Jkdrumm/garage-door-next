@@ -61,8 +61,11 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
       addEventListeners(socket, queryClient);
 
       onConnectEvents.current.forEach(({ event, resolve }) => {
-        if (resolve) resolve(webSocket.current?.emitWithAck.apply(webSocket.current, event));
-        else webSocket.current?.emit.apply(webSocket.current, event as any);
+        if (resolve)
+          resolve(
+            webSocket.current?.emitWithAck.apply(webSocket.current, event as Parameters<ClientSocket['emitWithAck']>),
+          );
+        else webSocket.current?.emit.apply(webSocket.current, event as Parameters<ClientSocket['emit']>);
       });
       onConnectEvents.current = [];
     });
