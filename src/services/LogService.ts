@@ -56,16 +56,17 @@ export class LogService {
       };
     }
 
+    const now = this.formatDate(new Date());
     // Load logs from the current day into the cache
-    this.getLogs(new Date().toLocaleDateString(), 'day').then(logs => (this.logCache = logs));
+    this.getLogs(now, 'day').then(logs => (this.logCache = logs));
     // Get the ms until the next day
-    const msUntilNextDay = new Date(new Date().toLocaleDateString()).getTime() + 86400000 - Date.now();
+    const msUntilNextDay = new Date(now).getTime() + 86400000 - Date.now();
     // Refresh the cache at the start of the next day
     setTimeout(() => {
       this.logCache = [];
       // Refresh the cache every day
       setInterval(() => {
-        this.getLogs(new Date().toLocaleDateString(), 'day').then(logs => (this.logCache = logs));
+        this.getLogs(this.formatDate(new Date()), 'day').then(logs => (this.logCache = logs));
       }, 86400000);
     }, msUntilNextDay);
   }
@@ -100,7 +101,10 @@ export class LogService {
    * @returns
    */
   public async getLogs(date: string, length: LogLength) {
-    if (this.logCache && length === 'day') return this.logCache;
+    // First format the date to be in the correct format
+    date = this.formatDate(date);
+    // If the date is today and we have a cache, return the cache
+    if (date === this.formatDate(new Date()) && this.logCache && length === 'day') return this.logCache;
     const startDate = new Date(date);
     startDate.setDate(startDate.getDate() + 1);
     const endDate = new Date(date);
@@ -127,6 +131,17 @@ export class LogService {
         });
     });
     return logs;
+  }
+
+  /**
+   * Formats a date into a string that can be used in the DB (yyyy-mm-dd)
+   * @param date The date to format
+   * @returns The formatted date
+   */
+  public formatDate(date: Date | string) {
+    if (typeof date === 'string') date = new Date(date);
+    if (isNaN(date.getTime())) throw new Error('Invalid date');
+    return date.toISOString().split('T')[0];
   }
 
   /**
