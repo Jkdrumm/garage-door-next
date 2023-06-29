@@ -7,6 +7,8 @@ import { useRouter } from 'next/router';
 import { WebSocketContext } from './WebSocketContext';
 import { addEventListeners } from './websocket';
 import { ClientSocket } from 'types';
+import { GARAGE_STATE_QUERY_KEY } from 'hooks';
+import { GarageState } from 'enums';
 
 type EmitParams = Parameters<ClientSocket['emit' | 'emitWithAck']>;
 
@@ -71,6 +73,8 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
     });
 
     socket.on('disconnect', () => {
+      // Set the garage state to fetching
+      queryClient.setQueryData<GarageState>([GARAGE_STATE_QUERY_KEY], () => GarageState.FETCHING);
       setTimeout(socketInitializer, 10000);
     });
 
