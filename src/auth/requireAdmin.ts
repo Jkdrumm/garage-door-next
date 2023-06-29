@@ -15,7 +15,13 @@ export function requireAdmin(getServerSideProps?: GetServerSideProps): GetServer
   return async function (context) {
     try {
       const user = await getUserFromCache(context.req);
-      if (user.userLevel < UserLevel.ADMIN) throw new Error('Unauthorized');
+      if (user.userLevel < UserLevel.ADMIN)
+        return {
+          redirect: {
+            destination: '/home',
+            permanent: false,
+          },
+        };
       const queryClient = new QueryClient();
       prefetchUser(queryClient, user);
       prefetchUserLevel(queryClient, user.userLevel);
@@ -38,6 +44,7 @@ export function requireAdmin(getServerSideProps?: GetServerSideProps): GetServer
       }
       return serverSideResult;
     } catch (e) {
+      console.error(e);
       return {
         redirect: {
           destination: '/home',
