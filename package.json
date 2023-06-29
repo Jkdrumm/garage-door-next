@@ -16,12 +16,13 @@
     "clean": "rimraf ./build && rimraf ./.next",
     "start": "next start",
     "lint": "next lint",
-    "pretty": "prettier --write \"./**/*.{ts,tsx,json}\"",
+    "pretty": "prettier --write .",
+    "pretty-check": "prettier --check .",
     "pkg": "pkg .",
     "precommit": "lint-staged"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx,json,md,yml,yaml}": "prettier --write"
+    "*": "prettier --write"
   },
   "bin": "server.js",
   "pkg": {
