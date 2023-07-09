@@ -1,6 +1,9 @@
 import { checkForNewVersion } from './checkForNewVersion';
 import { configureCertificates } from './configureCertificates';
 import { deleteUser } from './deleteUser';
+import { getCpuTemp } from './getCpuTemp';
+import { getDeviceName } from './getDeviceName';
+import { getDiskSpace } from './getDiskSpace';
 import { getDnsInfo } from './getDnsInfo';
 import { getLogs } from './getLogs';
 import { getNumNotifications } from './getNumNotifications';
@@ -10,6 +13,7 @@ import { getUser } from './getUser';
 import { getUsers } from './getUsers';
 import { getVersion } from './getVersion';
 import { press } from './press';
+import { updateDeviceName } from './updateDeviceName';
 import { installUpdate } from './installUpdate';
 import { updateProfile } from './updateProfile';
 import { updateUser } from './updateUser';
@@ -21,6 +25,9 @@ const listeners = [
   configureCertificates,
   configureDNS,
   deleteUser,
+  getCpuTemp,
+  getDeviceName,
+  getDiskSpace,
   getDnsInfo,
   getGarageState,
   getLogs,
@@ -31,6 +38,7 @@ const listeners = [
   getVersion,
   installUpdate,
   press,
+  updateDeviceName,
   updateProfile,
   updateUser,
 ];

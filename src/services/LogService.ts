@@ -1,7 +1,7 @@
-import { MongoClient } from 'mongodb';
 import { LogEntry, LogEntryResult, LogLength } from 'types';
 import { WebSocketService } from './WebSocketService';
 import { LogEvent } from 'enums';
+import { DatabaseService } from 'services';
 
 export class LogService {
   private logCache: LogEntry[] | undefined = undefined;
@@ -110,13 +110,12 @@ export class LogService {
     const endDate = new Date(date);
     if (length === 'month') endDate.setMonth(endDate.getMonth() - 1);
     else if (length === 'week') endDate.setDate(endDate.getDate() - 6);
-    const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
-    const db = client.db();
+    const client = await DatabaseService.getInstance().getClientAsync();
     const logs = await new Promise<LogEntry[]>((resolve, reject) => {
-      db.collection('logs')
+      client
+        .collection('logs')
         .find({ date: { $gte: endDate.toISOString(), $lt: startDate.toISOString() } })
         .toArray((error, result) => {
-          client.close().catch(console.error);
           if (error) reject(error);
           else if (!result) reject('No result');
           else {
@@ -149,7 +148,7 @@ export class LogService {
    * @param event The type of event
    * @param settings Additional information to add to the log
    */
-  public addEntry(
+  public async addEntry(
     event: LogEvent,
     { oldValue, newValue, userId, username, firstName, lastName, data }: Omit<LogEntryResult, 'id' | 'event' | 'date'>,
   ) {
@@ -164,10 +163,11 @@ export class LogService {
       lastName,
       data,
     };
-    MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`)
-      .then(async client => {
-        const db = client.db();
-        const result = await db.collection('logs').insertOne(log);
+    const client = await DatabaseService.getInstance().getClientAsync();
+    client
+      .collection('logs')
+      .insertOne(log)
+      .then(result => {
         const newLog = {
           id: result.insertedId.toString(),
           ...log,
@@ -175,8 +175,6 @@ export class LogService {
         delete (newLog as any)._id;
         this.logCache?.unshift(newLog);
         WebSocketService.getInstance().emitMessage('LIVE_LOG', newLog);
-        await client.close();
-      })
-      .catch(console.error);
+      });
   }
 }

@@ -5,6 +5,7 @@ import { LogEntry } from './LogEntry';
 import { CheckForNewVersionData } from 'hooks';
 
 export type ServerEmitEvents = {
+  DEVICE_NAME: (deviceName: string) => void;
   DNS_LOGIN: () => void;
   DNS_LOGIN_COMPLETE: (isLoggedIn: boolean) => void;
   GARAGE_STATE: (garageState: GarageState) => void;

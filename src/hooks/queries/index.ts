@@ -1,3 +1,6 @@
+export * from './useCpuTemp';
+export * from './useDeviceName';
+export * from './useDiskSpace';
 export * from './useDnsInfo';
 export * from './useGarageState';
 export * from './useLogs';

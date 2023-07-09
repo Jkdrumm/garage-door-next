@@ -1,5 +1,6 @@
 import type { ClientSocket } from 'types';
 import type { QueryClient } from '@tanstack/react-query';
+import { addDeviceNameListener } from './addDeviceNameListener';
 import { addDnsLoginCompleteListener } from './addDnsLoginCompleteListener';
 import { addDnsLoginListener } from './addDnsLoginListener';
 import { addGarageStateListener } from './addGarageStateListener';
@@ -17,6 +18,7 @@ import { addUserLevelListener } from './addUserLevelListener';
 import { addVersionUpdate } from './addVersionUpdate';
 
 const listeners = [
+  addDeviceNameListener,
   addDnsLoginCompleteListener,
   addDnsLoginListener,
   addGarageStateListener,

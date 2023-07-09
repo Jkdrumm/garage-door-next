@@ -1,7 +1,6 @@
-import { MongoClient } from 'mongodb';
 import type { User } from 'types';
 import { UserLevel } from 'enums';
-import { WebSocketService } from 'services';
+import { DatabaseService, WebSocketService } from 'services';
 
 export interface UsersCache {
   [id: string]: User;
@@ -28,12 +27,11 @@ export class UsersService {
    * Loads all users from the DB.
    */
   private async loadUsers() {
-    const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
-    const db = client.db();
-    db.collection('users')
+    const client = await DatabaseService.getInstance().getClientAsync();
+    client
+      .collection('users')
       .find()
       .toArray((error, result) => {
-        client.close().catch(console.error);
         if (error) throw error;
         else {
           const resultsPasswordRemoved = result?.map(user => ({

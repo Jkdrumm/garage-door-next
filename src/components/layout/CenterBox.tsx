@@ -36,9 +36,22 @@ export const CenterBox = forwardRef(({ title, showColorToggleOnDesktop, children
         justify="center"
         align="center"
         direction="column">
-        <Grid padding="16px" templateColumns={'repeat(3, 1fr)'} width="100%">
+        <Grid padding="16px" templateColumns={'repeat(3, 1fr)'} width="100%" alignItems="center">
           <Spacer />
-          <Heading textAlign="center" whiteSpace="nowrap">
+          <Heading
+            textAlign="center"
+            whiteSpace="nowrap"
+            size={(() => {
+              if (isMobile) {
+                if (title.length > 28) return 'sm';
+                if (title.length > 16) return 'md';
+                if (title.length > 12) return 'lg';
+              } else {
+                if (title.length > 24) return 'md';
+                if (title.length > 16) return 'lg';
+              }
+              return 'xl';
+            })()}>
             {title}
           </Heading>
           {isMobile || showColorToggleOnDesktop ? (

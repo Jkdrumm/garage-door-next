@@ -1,10 +1,9 @@
-import { MongoClient } from 'mongodb';
 import { getCurrentIp, updateRecords } from 'godaddy-dns';
 import Greenlock from 'greenlock';
 import fs from 'fs';
 import path from 'path';
 import { LogEvent } from 'enums';
-import { LogService, WebSocketService } from 'services';
+import { DatabaseService, LogService, WebSocketService } from 'services';
 import pkg from '../../package.json';
 
 export class DnsService {
@@ -49,10 +48,9 @@ export class DnsService {
   /**
    * Loads the DNS settings from the local MongoDB instance and logs in to GoDaddy.
    */
-  private loadDNS = async () => {
-    const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
-    const db = client.db();
-    const settings = await db.collection('settings').findOne();
+  private async loadDNS() {
+    const client = await DatabaseService.getInstance().getClientAsync();
+    const settings = await client.collection('settings').findOne();
     if (settings) {
       this.key = settings.dnsApiKey ?? null;
       this.hostname = settings.dnsHostname ?? null;
@@ -62,7 +60,7 @@ export class DnsService {
         await this.login();
       }
     }
-  };
+  }
 
   /**
    * Get the Singleton instance of this class
@@ -162,9 +160,8 @@ export class DnsService {
    */
   public async newLogin(key: string, secret: string, hostname: string) {
     await this.login(true, key, secret, hostname);
-    const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
-    const db = client.db();
-    await db
+    const client = await DatabaseService.getInstance().getClientAsync();
+    await client
       .collection('settings')
       .updateOne({}, { $set: { dnsHostname: hostname, dnsApiKey: key, dnsApiSecret: secret } }, { upsert: true });
     this.key = key;

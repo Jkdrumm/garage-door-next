@@ -1,11 +1,14 @@
 /* eslint-disable no-unused-vars */
-import type { DnsInfo, VersionData } from 'hooks';
+import type { DiskSpaceData, DnsInfo, VersionData } from 'hooks';
 import type { User } from './User';
 import type { LogEntry } from './LogEntry';
 import type { SocketReturnValue } from './SocketReturnValue';
 import { GarageState, UserLevel } from 'enums';
 
 export interface ClientEmitQueries {
+  GET_CPU_TEMP: (ack: (data: SocketReturnValue<number>) => void) => void;
+  GET_DEVICE_NAME: (ack: (data: SocketReturnValue<string>) => void) => void;
+  GET_DISK_SPACE: (ack: (data: SocketReturnValue<DiskSpaceData>) => void) => void;
   GET_DNS_INFO: (ack: (data: SocketReturnValue<DnsInfo>) => void) => void;
   GET_GARAGE_STATE: (ack: (data: SocketReturnValue<GarageState>) => void) => void;
   GET_LOGS: (ack: (data: SocketReturnValue<LogEntry[]>) => void) => void;
@@ -22,7 +25,8 @@ export interface ClientEmitMutations {
   CONFIGURE_DNS: (ack: (data: SocketReturnValue) => void) => void;
   DELETE_USER: (ack: (data: SocketReturnValue) => void) => void;
   INSTALL_UPDATE: (ack: (data: SocketReturnValue) => void) => void;
-  PRESS: (payload?: undefined, ack?: () => void) => void;
+  PRESS: (ack?: () => SocketReturnValue) => void;
+  UPDATE_DEVICE_NAME: (ack: (data: SocketReturnValue) => void) => void;
   UPDATE_PROFILE: (ack: (data: SocketReturnValue) => void) => void;
   UPDATE_USER: (ack: (data: SocketReturnValue) => void) => void;
 }

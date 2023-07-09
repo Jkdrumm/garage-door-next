@@ -1,17 +1,18 @@
 import { Button, Flex, Text } from '@chakra-ui/react';
 import { QueryClient, dehydrate } from '@tanstack/react-query';
 import { FiAlertCircle, FiAlertTriangle, FiLoader, FiLock, FiUnlock } from 'react-icons/fi';
-import { useUserLevel, usePress, useGarageState } from 'hooks';
+import { useUserLevel, usePress, useGarageState, useDeviceName } from 'hooks';
 import { CenterBox, useMainLayout } from 'components';
 import { UserLevel, GarageState } from 'enums';
 import { requireLoggedIn } from 'auth';
-import { prefetchGarageDoorState } from 'hooks/prefetch';
+import { prefetchDeviceName, prefetchGarageDoorState } from 'hooks/prefetch';
 
 function Home() {
   const { data: garageDoorState } = useGarageState();
   const doorState = garageDoorState as GarageState;
   const { data: userLevel } = useUserLevel();
   const { mutate: pressButton, isLoading: isWaitingAcknowledgement } = usePress();
+  const { data: deviceName } = useDeviceName();
 
   function getPermissionsText(canView: boolean) {
     if (canView)
@@ -40,7 +41,7 @@ function Home() {
   const canView = userLevel !== undefined && userLevel >= UserLevel.VIEWER;
 
   return (
-    <CenterBox title="Garage Door">
+    <CenterBox title={deviceName ?? 'Garage Door'}>
       {(!canMove || !canView) && (
         <Flex
           borderRadius="8px"
@@ -86,6 +87,7 @@ Home.getLayout = useMainLayout;
 export const getServerSideProps = requireLoggedIn(async () => {
   const queryClient = new QueryClient();
   prefetchGarageDoorState(queryClient);
+  prefetchDeviceName(queryClient);
   return { props: { dehydratedState: dehydrate(queryClient) } };
 });
 

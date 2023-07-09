@@ -5,5 +5,6 @@ export * from './useConfigureDNS';
 export * from './useDeleteUser';
 export * from './useInstallUpdate';
 export * from './usePress';
+export * from './useUpdateDeviceName';
 export * from './useUpdateProfile';
 export * from './useUpdateUser';

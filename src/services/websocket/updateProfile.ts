@@ -1,7 +1,7 @@
 import { Socket } from 'socket.io';
-import { MongoClient, ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb';
 import { addEventListener } from './utils';
-import { UsersService } from 'services';
+import { DatabaseService, UsersService } from 'services';
 import { hash } from 'bcryptjs';
 import { UserLevel } from 'enums';
 
@@ -19,12 +19,10 @@ export function updateProfile(socket: Socket, id: string) {
       if (hasFirstName) updateParameters.firstName = firstName;
       if (hasLastName) updateParameters.lastName = lastName;
       if (hasPassword) updateParameters.password = await hash(password, 12);
-      const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
-      const db = client.db();
-      const updateResult = await db
+      const client = DatabaseService.getInstance().getClient();
+      const updateResult = await client
         .collection('users')
         .updateOne({ _id: new ObjectId(user.id) }, { $set: updateParameters });
-      await client.close();
       if (updateResult.acknowledged) {
         delete updateParameters.password;
         if (hasFirstName || hasLastName) UsersService.getInstance().updateFields(user.id, updateParameters);
