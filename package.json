@@ -1,6 +1,6 @@
 {
   "name": "garage-door-next",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "author": {
     "name": "Joshua Drumm",
     "email": "Schythed@gmail.com"
@@ -45,7 +45,7 @@
     "hooks": "src/hooks/index",
     "services": "src/services/index",
     "types": "src/types/index",
-    "validators": "src/validators/index"
+    "validations": "src/validations/index"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.0.19",
