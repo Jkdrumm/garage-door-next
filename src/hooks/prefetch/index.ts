@@ -1,3 +1,4 @@
+export * from './prefetchDeviceName';
 export * from './prefetchDnsInfo';
 export * from './prefetchGarageDoorState';
 export * from './prefetchLogs';

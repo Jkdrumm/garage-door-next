@@ -34,6 +34,7 @@ import {
   FiUsers,
   FiLogOut,
   FiFileText,
+  FiTool,
 } from 'react-icons/fi';
 import { IconType } from 'react-icons';
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
@@ -55,6 +56,7 @@ const LinkItems: Array<LinkItemProps> = [
   { name: 'Settings', icon: FiSettings, requiredLevel: UserLevel.ADMIN, href: '/settings' },
   { name: 'User Settings', icon: FiUsers, requiredLevel: UserLevel.ADMIN, href: '/userSettings' },
   { name: 'Logs', icon: FiFileText, requiredLevel: UserLevel.ADMIN, href: '/logs' },
+  { name: 'System', icon: FiTool, requiredLevel: UserLevel.ADMIN, href: '/system' },
 ];
 
 const title = 'Garage Door 3.0';
@@ -280,31 +282,6 @@ function StickyNavBar({ onOpen, ...rest }: MobileProps) {
               <MenuItem as={Link} icon={<FiUser size="1.25em" />} href="/profile" _hover={{ textDecoration: 'none' }}>
                 Profile
               </MenuItem>
-              {(userLevel ?? -1) >= UserLevel.ADMIN && (
-                <>
-                  <MenuItem
-                    as={Link}
-                    icon={<FiSettings size="1.25em" />}
-                    href="/settings"
-                    _hover={{ textDecoration: 'none' }}>
-                    Settings
-                  </MenuItem>
-                  <MenuItem
-                    as={Link}
-                    icon={<FiUsers size="1.25em" />}
-                    href="/userSettings"
-                    _hover={{ textDecoration: 'none' }}>
-                    User Settings
-                  </MenuItem>
-                  <MenuItem
-                    as={Link}
-                    icon={<FiFileText size="1.25em" />}
-                    href="/logs"
-                    _hover={{ textDecoration: 'none' }}>
-                    Logs
-                  </MenuItem>
-                </>
-              )}
               <MenuItem onClick={toggleColorMode} display={{ base: 'block', md: 'none' }} icon={themeIcon}>
                 {useColorModeValue('Dark Mode', 'Light Mode')}
               </MenuItem>

@@ -9,18 +9,18 @@ import https from 'https';
 import { readFileSync, readdirSync } from 'fs';
 import next from 'next';
 import express from 'express';
-import { MongoClient } from 'mongodb';
-import openssl from 'openssl-nodejs';
 import { parse } from '@godd/certificate-parser';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 import dotenv from 'dotenv';
 dotenv.config();
 
 import {
+  DatabaseService,
   DnsService,
   GarageDoorService,
   LogService,
   OpenSslService,
+  SettingsService,
   UsersService,
   VersionService,
   WebSocketService,
@@ -48,10 +48,12 @@ const dev = process.env.NODE_ENV === 'development';
 const app = next({ dev, dir: __dirname, conf: nextConfig });
 
 // Load services
+DatabaseService.getInstance();
 DnsService.getInstance();
 GarageDoorService.getInstance();
 LogService.getInstance();
 OpenSslService.getInstance();
+SettingsService.getInstance();
 UsersService.getInstance();
 VersionService.getInstance();
 WebSocketService.getInstance();
@@ -91,36 +93,6 @@ function setCertificateRenewalTimeout(endDateString: string) {
   global.certificateRefreshTime = millisecondsUntilRenewall;
 }
 
-async function getSecret() {
-  const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
-  const db = client.db();
-  const settings = await db.collection('settings').findOne();
-  if (settings?.nextAuthSecret) {
-    global.NEXTAUTH_SECRET = settings.nextAuthSecret;
-    client.close();
-  } else {
-    let resolver: () => void;
-    // eslint-disable-next-line no-unused-vars
-    let rejector: (arg0: any) => void;
-    const returnPromise = (resolve: any, reject: any) => {
-      resolver = resolve;
-      rejector = reject;
-    };
-    openssl('openssl rand -base64 32', (async (err: any, buffer: any) => {
-      const error = err.toString();
-      if (error) rejector(error);
-      else {
-        const rand = buffer.toString();
-        // Save secret
-        await db.collection('settings').updateOne({}, { $set: { nextAuthSecret: rand } }, { upsert: true });
-        client.close();
-        resolver();
-      }
-    }) as any);
-    return returnPromise;
-  }
-}
-
 try {
   loadOptions();
   // eslint-disable-next-line no-empty
@@ -158,7 +130,8 @@ global.startHttps = function () {
 const localDomains = dev ? ['localhost'] : ['localhost', '.local'];
 
 // The NEXTAUTH_SECRET has to be loaded before the next.js server starts
-getSecret()
+SettingsService.getInstance()
+  .getNextAuthSecretAsync()
   .then(() =>
     app
       .prepare()
@@ -189,8 +162,7 @@ getSecret()
         if (enableHttps) startHttps();
       })
       .catch(console.error),
-  )
-  .catch(console.error);
+  );
 
 global.completeUpdate = function completeUpdate() {
   process.exit();

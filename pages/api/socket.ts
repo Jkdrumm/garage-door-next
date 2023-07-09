@@ -1,6 +1,6 @@
 import type { NextApiHandler, NextApiRequest } from 'next';
 import { Server, ServerOptions } from 'socket.io';
-import type { ServerSocket, SocketApiResponse } from 'types';
+import type { ClientEmitEvents, ServerEmitEvents, ServerSocket, SocketApiResponse } from 'types';
 import { WebSocketService } from 'services';
 import { apiRequireLoggedIn } from 'auth';
 import { getUserLevel, getSession, getUser } from 'auth/get';
@@ -19,7 +19,7 @@ async function socket(req: NextApiRequest, res: SocketApiResponse) {
     // Just in case, we'll reset all of the listeners
     res.socket.server.io.sockets.removeAllListeners();
   } else {
-    const io = new Server(res.socket.server as any as ServerOptions);
+    const io = new Server<ClientEmitEvents, ServerEmitEvents>(res.socket.server as any as ServerOptions);
     res.socket.server.io = io;
   }
   res.socket.server.io.on(

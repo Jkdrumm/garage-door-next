@@ -1,8 +1,7 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { MongoClient } from 'mongodb';
 import { compare } from 'bcryptjs';
-import { OpenSslService, UsersService } from 'services';
+import { DatabaseService, OpenSslService, UsersService } from 'services';
 
 const USERNAME_OR_PASSWORD_ERROR_MESSAGE = 'Invalid Username/Password';
 
@@ -16,19 +15,11 @@ export default NextAuth({
       async authorize(credentials) {
         const password = credentials?.password ?? '';
         const username = credentials?.username ?? '';
-        const client = await MongoClient.connect(`mongodb://${process.env.MONGODB_URI}`);
-        const users = client.db().collection('users');
+        const users = DatabaseService.getInstance().getClient().collection('users');
         const result = await users.findOne({ username: { $regex: new RegExp(username, 'i') } });
-        if (!result) {
-          await client.close();
-          throw new Error(USERNAME_OR_PASSWORD_ERROR_MESSAGE);
-        }
+        if (!result) throw new Error(USERNAME_OR_PASSWORD_ERROR_MESSAGE);
         const checkPassword = await compare(password, result.password);
-        if (!checkPassword) {
-          await client.close();
-          throw new Error(USERNAME_OR_PASSWORD_ERROR_MESSAGE);
-        }
-        await client.close();
+        if (!checkPassword) throw new Error(USERNAME_OR_PASSWORD_ERROR_MESSAGE);
         return {
           id: result._id.toString(),
         };
@@ -47,5 +38,5 @@ export default NextAuth({
       return token;
     },
   },
-  secret: OpenSslService.getInstance().getRand(),
+  secret: OpenSslService.getInstance().getNextAuthSecret(),
 });

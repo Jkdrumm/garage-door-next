@@ -39,18 +39,23 @@ import {
   useConfigureDns,
   useConfigureCertificates,
   useInstallUpdate,
+  useDeviceName,
+  useUpdateDeviceName,
 } from 'hooks';
-import { prefetchDnsInfo, prefetchVersion } from 'hooks/prefetch';
-import { validateDomain, validateApiSecret, validateApiKey } from 'validations';
+import { prefetchDeviceName, prefetchDnsInfo, prefetchVersion } from 'hooks/prefetch';
+import { validateDomain, validateApiSecret, validateApiKey, validateDeviceName } from 'validations';
 import pack from '../package.json';
 
 function Settings() {
   const { isOpen: isOpenDNS, onOpen: onOpenDNS, onClose: onCloseDNS } = useDisclosure();
+  const { isOpen: isOpenRename, onOpen: onOpenRename, onClose: onCloseRename } = useDisclosure();
   const isMobile = useIsMobile();
   const toast = useToast();
   const [dnsSignInError, setDnsSignInError] = useState<string>('');
+  const [renameError, setRenameError] = useState<string>('');
   const { data: dnsInfo, isLoading: dnsInfoIsLoading } = useDnsInfo();
   const { data: versionInfo, isLoading: versionInfoIsLoading } = useVersion();
+  const { data: deviceName } = useDeviceName();
 
   const { mutate: checkForNewVersion, isLoading: isCheckingForNewVersion } = useCheckForNewVersion();
 
@@ -67,6 +72,19 @@ function Settings() {
       closeDnsDrawer();
     },
     onError: ({ error }) => setDnsSignInError(error),
+  });
+
+  const { mutateAsync: renameDevice } = useUpdateDeviceName({
+    onSuccess: () => {
+      toast({
+        title: 'Device Name Updated',
+        status: 'success',
+        position: 'bottom-left',
+        isClosable: true,
+      });
+      onCloseRename();
+    },
+    onError: ({ error }) => setRenameError(error),
   });
 
   const { mutate: configureCertificates, isLoading: isLoadingCertificates } = useConfigureCertificates({
@@ -99,6 +117,21 @@ function Settings() {
         <Heading mb="32px" mt={{ base: '24px', md: '40px' }}>
           Settings
         </Heading>
+        <Flex
+          borderRadius="20px"
+          bg={useColorModeValue('white', 'gray.700')}
+          width="100%"
+          shadow={`0px 0px 32px 0px ${useColorModeValue('#4E4E4E2E', '#000000AA')}`}
+          justify="center"
+          align="center"
+          direction="column"
+          padding="16px 0px"
+          mb="16px">
+          Device Name: {deviceName ?? 'Not Configured'}
+          <Button colorScheme="cyan" onClick={onOpenRename}>
+            Rename
+          </Button>
+        </Flex>
         <Flex
           borderRadius="20px"
           bg={useColorModeValue('white', 'gray.700')}
@@ -212,6 +245,51 @@ function Settings() {
           </Flex>
         </Stack>
       </Container>
+      <Drawer isOpen={isOpenRename} onClose={onCloseRename} placement={isMobile ? 'bottom' : 'right'}>
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerCloseButton />
+          <DrawerHeader>Rename Device</DrawerHeader>
+          <Formik
+            initialValues={{ deviceName: deviceName ?? '' }}
+            onSubmit={renameDevice}
+            validateOnMount={false}
+            validateOnChange>
+            {props => (
+              <Form>
+                <DrawerBody>
+                  <Text mb="16px">
+                    The device name is how you and others will identify this device. Make sure it is descriptive e.g.
+                    &quot;John Doe&apos;s Garage Door&quot; or &quot;Smith Family&quot;.
+                  </Text>
+                  <Field name="deviceName" validate={validateDeviceName}>
+                    {({ field, form }: { field: any; form: any }) => (
+                      <FormControl isInvalid={form.errors.deviceName && form.touched.deviceName}>
+                        <FormLabel htmlFor="deviceName">Device Name</FormLabel>
+                        <Input {...field} id="deviceName" />
+                        <FormErrorMessage>{form.errors.deviceName}</FormErrorMessage>
+                      </FormControl>
+                    )}
+                  </Field>
+                  {renameError && (
+                    <Text textColor="red.300" mt="4px">
+                      {renameError}
+                    </Text>
+                  )}
+                </DrawerBody>
+                <DrawerFooter>
+                  <Button variant="outline" mr={3} onClick={onCloseRename}>
+                    Cancel
+                  </Button>
+                  <Button colorScheme="blue" type="submit" isDisabled={!props.isValid} isLoading={props.isSubmitting}>
+                    Save
+                  </Button>
+                </DrawerFooter>
+              </Form>
+            )}
+          </Formik>
+        </DrawerContent>
+      </Drawer>
       <Drawer isOpen={isOpenDNS} onClose={closeDnsDrawer} placement={isMobile ? 'bottom' : 'right'}>
         <DrawerOverlay />
         <DrawerContent>
@@ -290,6 +368,7 @@ export const getServerSideProps = requireAdmin(async () => {
   const queryClient = new QueryClient();
   prefetchDnsInfo(queryClient);
   await prefetchVersion(queryClient);
+  prefetchDeviceName(queryClient);
   return { props: { dehydratedState: dehydrate(queryClient) } };
 });
 
