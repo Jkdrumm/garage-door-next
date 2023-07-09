@@ -31,7 +31,6 @@ export class OpenSslService {
    */
   private async getRand() {
     const savedNextAuthSecret = await SettingsService.getInstance().getNextAuthSecretAsync();
-    console.log('savedNextAuthSecret', savedNextAuthSecret);
     if (savedNextAuthSecret) {
       this.nextAuthSecret = savedNextAuthSecret;
       return;
