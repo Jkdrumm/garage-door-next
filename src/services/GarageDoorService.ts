@@ -1,7 +1,6 @@
 import { Gpio } from 'onoff';
 import { GarageState, LogEvent, UserLevel } from 'enums';
 import { LogService, UsersService, WebSocketService } from 'services';
-
 export class GarageDoorService {
   private doorState: GarageState | undefined;
 

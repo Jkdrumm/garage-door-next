@@ -14,17 +14,7 @@ import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 import dotenv from 'dotenv';
 dotenv.config();
 
-import {
-  DatabaseService,
-  DnsService,
-  GarageDoorService,
-  LogService,
-  OpenSslService,
-  SettingsService,
-  UsersService,
-  VersionService,
-  WebSocketService,
-} from './src/services';
+import * as services from './src/services';
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,
@@ -48,15 +38,7 @@ const dev = process.env.NODE_ENV === 'development';
 const app = next({ dev, dir: __dirname, conf: nextConfig });
 
 // Load services
-DatabaseService.getInstance();
-DnsService.getInstance();
-GarageDoorService.getInstance();
-LogService.getInstance();
-OpenSslService.getInstance();
-SettingsService.getInstance();
-UsersService.getInstance();
-VersionService.getInstance();
-WebSocketService.getInstance();
+Object.keys(services).forEach(service => services[service as keyof typeof services].getInstance());
 
 const handle = app.getRequestHandler();
 const server = express();
@@ -75,15 +57,20 @@ function loadOptions() {
   );
   const { name: domainName } = directories[0];
   if (directories.length !== 0) {
-    enableHttps = true;
     options.cert = readFileSync(`.config/greenlock/live/${domainName}/cert.pem`).toString();
     options.ca = readFileSync(`.config/greenlock/live/${domainName}/bundle.pem`).toString();
     options.key = readFileSync(`.config/greenlock/live/${domainName}/privkey.pem`).toString();
     const parsedCertificate = parse(options.cert as any);
-    setCertificateRenewalTimeout(parsedCertificate.validTo.toString());
+    const certificateValidThrough = parsedCertificate.validTo.toString();
+    enableHttps = setCertificateRenewalTimeout(certificateValidThrough);
   } else enableHttps = false;
 }
 
+/**
+ * A function to set the certificate renewal timeout
+ * @param endDateString The date the certificate expires
+ * @returns Whether or not the certificate is unexpired
+ */
 function setCertificateRenewalTimeout(endDateString: string) {
   const endDate = new Date(endDateString).valueOf();
   const now = new Date().valueOf();
@@ -91,6 +78,7 @@ function setCertificateRenewalTimeout(endDateString: string) {
   // Give an extra day of buffer
   const millisecondsUntilRenewall = millisecondsUntilExpiration - 8640000;
   global.certificateRefreshTime = millisecondsUntilRenewall;
+  return millisecondsUntilExpiration > 0;
 }
 
 try {
@@ -130,7 +118,7 @@ global.startHttps = function () {
 const localDomains = dev ? ['localhost'] : ['localhost', '.local'];
 
 // The NEXTAUTH_SECRET has to be loaded before the next.js server starts
-SettingsService.getInstance()
+services.SettingsService.getInstance()
   .getNextAuthSecretAsync()
   .then(() =>
     app
