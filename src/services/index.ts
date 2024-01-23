@@ -1,4 +1,3 @@
-export * from './BluetoothService';
 export * from './DatabaseService';
 export * from './DnsService';
 export * from './GarageDoorService';
