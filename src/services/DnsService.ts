@@ -21,10 +21,13 @@ export class DnsService {
   private isLoggingIn: boolean;
   private isGettingCertificates: boolean;
 
+  private dnsLockout: number | null;
+
   private constructor() {
     this.key = null;
     this.secret = null;
     this.hostname = null;
+    this.dnsLockout = null;
     this.isLoggedIn = false;
     this.isLoggingIn = false;
     this.isGettingCertificates = false;
@@ -52,6 +55,9 @@ export class DnsService {
     const client = await DatabaseService.getInstance().getClientAsync();
     const settings = await client.collection('settings').findOne();
     if (settings) {
+      const dnsLockout = settings.dnsLockout ?? null;
+      // If the lockout time is in the future, set it to the ms until the lockout
+      if (new Date(dnsLockout) > new Date()) this.dnsLockout = new Date(dnsLockout).valueOf() - new Date().valueOf();
       this.key = settings.dnsApiKey ?? null;
       this.hostname = settings.dnsHostname ?? null;
       this.secret = settings.dnsApiSecret ?? null;
@@ -141,6 +147,8 @@ export class DnsService {
     // JavaScript limits timers to 32-bit integers, which only allows for ~25 day timers.
     // Greenlock gives certificates valid for ~90 days.
     const MAX_TIMER_LENGTH = 2147483647;
+    // If the DNS lockout is set, use that as the timer
+    if (this.dnsLockout) global.certificateRefreshTime = this.dnsLockout;
     if (global.certificateRefreshTime > MAX_TIMER_LENGTH) {
       setTimeout(() => {
         global.certificateRefreshTime -= MAX_TIMER_LENGTH;
@@ -148,6 +156,11 @@ export class DnsService {
       }, MAX_TIMER_LENGTH);
     } else
       setTimeout(() => {
+        if (this.dnsLockout) {
+          const client = DatabaseService.getInstance().getClient();
+          client.collection('settings').updateOne({}, { $set: { dnsLockout: null } }, { upsert: true });
+          this.dnsLockout = null;
+        }
         this.getNewCertificates().catch(console.error);
       }, global.certificateRefreshTime);
   }
@@ -233,6 +246,10 @@ export class DnsService {
    * @throws Error when unable to get new certificates
    */
   public async getNewCertificates() {
+    if (this.dnsLockout !== null) {
+      const dnsLockoutDate = new Date(new Date().valueOf() + this.dnsLockout);
+      throw new Error(`DNS is locked out until ${dnsLockoutDate}`);
+    }
     if (this.isGettingCertificates) throw new Error('Already getting certificates');
     this.isGettingCertificates = true;
     WebSocketService.getInstance().emitMessage('GETTING_CERTIFICATES');
@@ -267,7 +284,41 @@ export class DnsService {
       this.isGettingCertificates = false;
       WebSocketService.getInstance().emitMessage('GETTING_CERTIFICATES_COMPLETE', true);
     } catch (error) {
-      console.error(error);
+      const errorT = error as {
+        message: string;
+        context: string;
+        subject: string;
+        altname: string;
+        // eslint-disable-next-line no-unused-vars
+        toJSON: (e: unknown) => Object;
+        servername: string;
+        _site: {
+          subject: string;
+          altnames: string[];
+          renewAt: string;
+          agreeToTerms: boolean;
+          subscriberEmail: string;
+          staging: boolean;
+          store: {
+            module: string;
+            basePath: string;
+          };
+          challenges: unknown;
+        };
+      };
+      const errorDetails = JSON.parse(errorT.message.split('\n')[1]) as {
+        type: string;
+        detail: string;
+        status: number;
+      };
+      if (errorDetails.status === 429) {
+        const startIndex = errorDetails.detail.indexOf('retry after') + 12;
+        // Set the lockout time to 5 minutes after the retry time
+        const dnsLockout = new Date(errorDetails.detail.substring(startIndex, startIndex + 20)).valueOf() + 300000;
+        this.dnsLockout = dnsLockout;
+        const client = DatabaseService.getInstance().getClient();
+        await client.collection('settings').updateOne({}, { $set: { dnsLockout } }, { upsert: true });
+      }
       this.isGettingCertificates = false;
       WebSocketService.getInstance().emitMessage('GETTING_CERTIFICATES_COMPLETE', this.getIsRunningHttps());
       throw error;
